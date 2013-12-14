@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+    
+    <head>
+        <script src="src/default-katavorio-helper.js"></script>
+        <script src="src/katavorio-0.1.js"></script>
+        <style>
+            .jsplumb-drag-no-select * {
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;    
+            }
+        
+            .w {
+                position:absolute;width:50px;height:50px;border:1px solid black;
+                font-size:12px;
+                border-radius:5px;
+                text-align:center;
+            }
+            
+            #parentConstrain, #constrainBySelector {
+                width:700px;
+                height:500px;
+                border:2px solid red;
+                position:relative;
+            }
+            
+            #one, #eleven { top:50px;left:50px; }
+            #two, #twelve { top:350px;left:350px; }
+            #three, #thirteen { top:50px; left:300px; }
+            #four, #fourteen { top: 300px; left:70px; }
+            #five { top:450px; left:250px; }
+            #six { top:250px; left:450px; }
+            #seven { left:720px; top:0px;}
+            #eight { left:790px; top:60px;}
+            #nine { left:920px; top:10px;}
+            #ten { left:820px; top:200px;}
+            
+            .jsplumb-draggable {
+                border:3px dotted orange;
+            }
+            
+            .jsplumb-droppable {
+                border:2px solid blue;
+            }
+            
+            .jsplumb-draggable:after {
+                content:"\A DRAG"
+            }
+            
+            .jsplumb-droppable:after {
+                content:"\A DROP"
+            }
+            
+             .jsplumb-draggable.jsplumb-droppable:after {
+                 content:"\A DRAG \A DROP"
+             }
+            
+            .jsplumb-drag {
+                background-color:#999;
+                color:white;
+            }
+            .jsplumb-drag-active {
+                border:3px solid green;
+            }
+            .jsplumb-drag-hover {
+                background:#E77;
+                color:whitesmoke
+            }
+        </style>
+    </head>
+    <body onload="init();">
+    
+        <div id="parentConstrain">
+            CONSTRAINED TO PARENT
+            <div class="w" id="one" scope="FOO BAR" drag constrain="parent">FOO BAR</div>
+            <div class="w" id="two" scope="BAR BAZ" drop>BAR BAZ</div>
+            <div class="w" id="three" scope="BAZ" drop drag>BAZ</div>
+            <div class="w" id="four" scope="BAZ" drag constrain="parent">BAZ</div>
+            <div class="w" id="five" scope="FOO BAR BAZ" drag>FOO BAR BAZ</div>
+            <div class="w" id="six" scope="FOO" drop>FOO</div>
+       </div>
+    
+        <div class="w free" id="seven" scope="FOO QUX" drag>FOO QUX</div>
+        <div class="w free" id="eight" scope="QUX" drop>QUX</div>
+        <div class="w free" id="nine" scope="POO QUX" drag>POO QUX</div>
+        <div class="w free" id="ten" scope="POO" drop constrain=".idontexist">POO</div>
+        
+        <div id="constrainBySelector">
+            <div class="w" id="eleven" scope="FOO QUX" drag constrain="#constrainBySelector">FOO QUX</div>
+            <div class="w" id="twelve" scope="QUX" drop constrain="#constrainBySelector">QUX</div>
+            <div class="w" id="thirteen" scope="POO QUX" drag constrain="#constrainBySelector">POO QUX</div>
+            <div class="w" id="fourteen" scope="POO" drop constrain="#constrainBySelector">POO</div>
+        </div>
+    
+        <script>
+            function init() {
+                var seh = new DefaultKatavorioHelper();
+                var k = window.k = new Katavorio({
+                    getPosition:seh.getPosition,
+                    setPosition:seh.setPosition,
+                    getSize:seh.getSize,
+                    addClass:seh.addClass,
+                    removeClass:seh.removeClass,
+                    bind:seh.addEvent,
+                    unbind:seh.removeEvent,
+                    fireEvent:function() { 
+                        console.log(arguments); 
+                    },
+                    intersects:seh.intersects
+                });
+              
+                // setup demo elements for drag and/or drop
+                var w = document.querySelectorAll(".w");
+                for (var i = 0; i < w.length; i++) {
+                    var scope = w[i].getAttribute("scope");
+                    if (w[i].getAttribute("drag") != null)
+                        k.draggable(w[i], {scope:scope, constrain:w[i].getAttribute("constrain") });
+                    if (w[i].getAttribute("drop") != null)
+                        k.droppable(w[i], {scope:scope });
+                    
+                }
+            }
+        </script>
+        
+    </body>
+    
+</html>    
