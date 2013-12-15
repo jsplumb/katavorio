@@ -1,5 +1,5 @@
 /*
- simple event binding script, used in a default katavorio setup
+ default helper for katavorio.
 */
 
 ;(function() {
@@ -7,8 +7,7 @@
         this.addEvent = function( obj, type, fn ) {
             if (obj.addEventListener)
                 obj.addEventListener( type, fn, false );
-            else if (obj.attachEvent)
-            {
+            else if (obj.attachEvent) {
                 obj["e"+type+fn] = fn;
                 obj[type+fn] = function() { obj["e"+type+fn]( window.event ); }
                 obj.attachEvent( "on"+type, obj[type+fn] );
@@ -53,7 +52,7 @@
         };
         
         this.addClass = function(el, c) { el.classList.add(c) };
-        this.removeClass = function(el, c) { el.classList.remove(c) };
+        this.removeClass = function(el, c) { el.classList.remove(c); };
     };
     
 }).call(this);
