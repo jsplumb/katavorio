@@ -171,7 +171,18 @@
                             canDrag:beforeCanDrag
                         });
                     if (w[i].getAttribute("drop") != null)
-                        k.droppable(w[i], {scope:scope, canDrop:canDropCb });                    
+                        k.droppable(w[i], {
+                            scope:scope, 
+                            canDrop:canDropCb,
+                            over:function() {
+                                console.log("OVER!");
+                                console.log(arguments);
+                            },
+                            out:function() {
+                                console.log("OUT!");
+                                console.log(arguments);
+                            }
+                        });
                 }
                 
                 // setup zoom

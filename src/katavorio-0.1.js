@@ -33,6 +33,8 @@
             noSelect : "jsplumb-drag-no-select" // added to the body to provide a hook to suppress text selection
         }, 
         _scope = "jsplumb-drag-scope",
+        _events = [ "stop", "start", "drag", "drop", "over", "out" ],
+        _devNull = function() {},
         _pl = function(e) {
             return e.pageX ?
                    [ e.pageX, e.pageY ] :
@@ -84,7 +86,7 @@
                     params.bind(document, "mouseup", upListener);                    
                     k.markSelection(this);                    
                     params.addClass(document.body, _classes.noSelect);
-                    params.fireEvent("start", el, posAtDown, e);
+                    params.events["start"]({el:el, pos:posAtDown, e:e, drag:this});
                 }
             }.bind(this),            
             moveListener = function(e) {
@@ -105,7 +107,7 @@
                 params.removeClass(document.body, _classes.noSelect);
                 this.unmark(e);
                 k.unmarkSelection(this, e);
-                params.fireEvent("stop", el, null, e);
+                params.events["stop"]({el:el, pos:params.getPosition(el), e:e, drag:this});
             }.bind(this);
             
         params.bind(el, "mousedown", downListener);                  
@@ -125,24 +127,26 @@
             _setDroppablesActive(matchingDroppables, false, true, this);
             matchingDroppables.length = 0;
             for (var i = 0; i < intersectingDroppables.length; i++)
-                intersectingDroppables[i].drop(this, e);                    
+                intersectingDroppables[i].drop(this, e);
             params.removeClass(el, params.dragClass || _classes.drag);
         };
         this.moveBy = function(dx, dy, e) {
             intersectingDroppables.length = 0;
             var cPos = constrain([posAtDown[0] + dx, posAtDown[1] + dy]),
-                rect = { x:cPos[0], y:cPos[1], w:this.size[0], h:this.size[1]};                
+                rect = { x:cPos[0], y:cPos[1], w:this.size[0], h:this.size[1]};
             params.setPosition(el, cPos);
             for (var i = 0; i < matchingDroppables.length; i++) {
                 var r2 = { x:matchingDroppables[i].position[0], y:matchingDroppables[i].position[1], w:matchingDroppables[i].size[0], h:matchingDroppables[i].size[1]};
                 if (params.intersects(rect, r2) && matchingDroppables[i].canDrop(this)) {
                     intersectingDroppables.push(matchingDroppables[i]);
-                    matchingDroppables[i].setHover(this, true);
+                    matchingDroppables[i].setHover(this, true, e);
                 }
-                else if (matchingDroppables[i].el._katavorioDragHover)
-                    matchingDroppables[i].setHover(this, false);
+                else if (matchingDroppables[i].el._katavorioDragHover) {
+                    matchingDroppables[i].setHover(this, false, e);
+                }
             }
-            if (e) params.fireEvent("drag", el, cPos, e);            
+            if (e)
+                params.events["drag"]({el:el, pos:cPos, e:e, drag:this});
         };
     };
     
@@ -163,16 +167,19 @@
            return true;
         };
         
-        this.setHover = function(drag, val) {
+        this.setHover = function(drag, val, e) {
             // if turning off hover but this was not the drag that caused the hover, ignore.
             if (val || el._katavorioDragHover == null || el._katavorioDragHover == drag.el._katavorio) {
                 params[val ? "addClass" : "removeClass"](el, _classes.hover);
                 el._katavorioDragHover = val ? drag.el._katavorio : null;
-            }            
+                if (hover !== val)
+                    params.events[val ? "over" : "out"]({el:el, e:e, drag:drag, drop:this});
+                hover = val;
+            }
         };
         
         this.drop = function(drag, event) {
-            params.fireEvent("drop", { drag:drag, event:event });
+            params.events["drop"]({ drag:drag, event:event, drop:this });
         };
     };
     
@@ -219,9 +226,16 @@
             },
             _prepareParams = function(p) {
                 p = p || {};
-                var _p = {};
+                var _p = {
+                    events:{}
+                };
                 for (var i in katavorioParams) _p[i] = katavorioParams[i];
                 for (var i in p) _p[i] = p[i];
+                // events
+                
+                for (var i = 0; i < _events.length; i++) {
+                    _p.events[_events[i]] = p[_events[i]] || _devNull;
+                }
                 _p.katavorio = this;
                 return _p;
             }.bind(this);
