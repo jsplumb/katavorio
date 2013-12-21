@@ -22,6 +22,20 @@
 ;(function() {
     
     "use strict";
+
+    var ms = typeof HTMLElement != "undefined" ? (HTMLElement.prototype.webkitMatchesSelector || HTMLElement.prototype.mozMatchesSelector || HTMLElement.prototype.oMatchesSelector || HTMLElement.prototype.msMatchesSelector) : null;
+	var matchesSelector = function(el, selector, ctx) {
+		if (ms)
+            return ms.apply(el, [ selector, ctx ]);
+
+		ctx = ctx || el.parentNode;
+		var possibles = ctx.querySelectorAll(selector);
+		for (var i = 0; i < possibles.length; i++) {
+			if (possibles[i] === el)
+				return true;
+		}
+		return false;
+	};
     
     var _classes = {
             draggable:"jsplumb-draggable",    // draggable elements
@@ -35,6 +49,7 @@
         _scope = "jsplumb-drag-scope",
         _events = [ "stop", "start", "drag", "drop", "over", "out" ],
         _devNull = function() {},
+        _true = function() { return true; },
         _pl = function(e) {
             return e.pageX ?
                    [ e.pageX, e.pageY ] :
@@ -68,18 +83,34 @@
         this._class = _classes.draggable;
         var k = Super.apply(this, arguments),
             downAt = [0,0], posAtDown = null,
-            constrain = params.constrain ? function(pos) {
-                var r = { x:pos[0], y:pos[1], w:this.size[0], h:this.size[1] },
-                    x = Math.max(0, Math.min(constrainRect.w - this.size[0], pos[0])),
-                    y = Math.max(0, Math.min(constrainRect.h - this.size[1], pos[1]));
-                   
-                return [ x, y ];
+			toGrid = function(pos) {
+				return params.grid == null ? pos :
+					[
+						params.grid[0] * Math.floor(pos[0] / params.grid[0]),
+						params.grid[1] * Math.floor(pos[1] / params.grid[1])
+					];
+			},
+			constrain = params.constrain ? function(pos) {
+                var r = { x:pos[0], y:pos[1], w:this.size[0], h:this.size[1] };
+                return [ 
+					Math.max(0, Math.min(constrainRect.w - this.size[0], pos[0])),
+					Math.max(0, Math.min(constrainRect.h - this.size[1], pos[1]))
+				];
             }.bind(this) : function(pos) { return pos; },
-            canDrag = params.canDrag || function() { return true; },
+            filter = _true,
+            _setFilter = this.setFilter = function(f) {
+                if (f) {
+                    filter = function(e) {
+                        var t = e.srcElement || e.target;
+                        return !matchesSelector(t, f, el);
+                    };
+                }
+            },
+            canDrag = params.canDrag || _true,
             constrainRect,
             matchingDroppables = [], intersectingDroppables = [],            
             downListener = function(e) {
-                if (this.isEnabled() && canDrag()) {
+                if (this.isEnabled() && canDrag() && filter(e)) {
                     downAt = _pl(e);
                     this.mark();
                     params.bind(document, "mousemove", moveListener);
@@ -109,9 +140,7 @@
                 k.unmarkSelection(this, e);
                 params.events["stop"]({el:el, pos:params.getPosition(el), e:e, drag:this});
             }.bind(this);
-            
-        params.bind(el, "mousedown", downListener);                  
-        
+
         this.mark = function() {
             posAtDown = params.getPosition(el);
             this.size = params.getSize(el);
@@ -132,7 +161,8 @@
         };
         this.moveBy = function(dx, dy, e) {
             intersectingDroppables.length = 0;
-            var cPos = constrain([posAtDown[0] + dx, posAtDown[1] + dy]),
+            var //cPos = constrain([posAtDown[0] + dx, posAtDown[1] + dy]),
+			cPos = constrain(toGrid(([posAtDown[0] + dx, posAtDown[1] + dy]))),
                 rect = { x:cPos[0], y:cPos[1], w:this.size[0], h:this.size[1]};
             params.setPosition(el, cPos);
             for (var i = 0; i < matchingDroppables.length; i++) {
@@ -145,17 +175,22 @@
                     matchingDroppables[i].setHover(this, false, e);
                 }
             }
-            if (e)
-                params.events["drag"]({el:el, pos:cPos, e:e, drag:this});
+          	params.events["drag"]({el:el, pos:cPos, e:e, drag:this});
         };
+
+		// init:register mousedown, and perhaps set a filter
+		params.bind(el, "mousedown", downListener);
+        _setFilter(params.filter);
     };
     
     var Drop = function(el, params) {
         this._class = _classes.droppable;
+        this._activeClass = params.activeClass || _classes.active;
+        this._hoverClass = params.hoverClass || _classes.hover;
         var k = Super.apply(this, arguments), hover = false;
                 
         this.setActive = function(val) {
-            params[val ? "addClass" : "removeClass"](el, _classes.active);
+            params[val ? "addClass" : "removeClass"](el, this._activeClass);
         };
         
         this.updatePosition = function() {
@@ -170,7 +205,7 @@
         this.setHover = function(drag, val, e) {
             // if turning off hover but this was not the drag that caused the hover, ignore.
             if (val || el._katavorioDragHover == null || el._katavorioDragHover == drag.el._katavorio) {
-                params[val ? "addClass" : "removeClass"](el, _classes.hover);
+                params[val ? "addClass" : "removeClass"](el, this._hoverClass);
                 el._katavorioDragHover = val ? drag.el._katavorio : null;
                 if (hover !== val)
                     params.events[val ? "over" : "out"]({el:el, e:e, drag:drag, drop:this});
@@ -242,7 +277,7 @@
         
         this.draggable = function(el, params) {
             el = _gel(el);
-            var p = _prepareParams(params, this);            
+            var p = _prepareParams(params, this);
             el._katavorioDrag = new Drag(el, p);
             _reg(el._katavorioDrag, _dragsByScope);
         };
@@ -293,27 +328,27 @@
             _selection.length = 0;
             _selectionMap = {};
         };
-        
+
         this.markSelection = function(drag) {
             _each(_selection, function(e) { e.mark(); }, drag);
         };
-        
+
         this.unmarkSelection = function(drag, event) {
             _each(_selection, function(e) { e.unmark(event); }, drag);
         };
-        
+
         this.getSelection = function() {
             return _selection.slice(0);
         };
-        
+
         this.updateSelection = function(dx, dy, drag) {
             _each(_selection, function(e) { e.moveBy(dx, dy); }, drag);
         };
-        
+
         this.setZoom = function(z) {
             _zoom = z;
         };
-        
+
         this.getZoom = function() { return _zoom; };
-    };        
+    };
 }).call(this);

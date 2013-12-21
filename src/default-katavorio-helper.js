@@ -1,9 +1,78 @@
-/*
- default helper for katavorio.
+/**
+* @name DefaultKatavorioHelper
+* @classDesc Default helper for Katavorio. Provides methods to get/set class names,  get/set element positions (using absolute
+* coordinates), attach/detach event listeners, and get element sizes.  Also shims the `indexOf` function if it is 
+* missing (IE < 9).
 */
 
 ;(function() {
+    var support = {
+			cl:'classList' in document.createElement('a'),
+			io: 'indexOf' in []
+    	},
+		trim = function(str) {
+			return str == null ? null : (str.replace(/^\s\s*/, '').replace(/\s\s*$/, ''));
+		},
+		_setClassName = function(el, cn) {
+			cn = trim(cn);
+			if (typeof el.className.baseVal != "undefined") // SVG
+				el.className.baseVal = cn;
+			else
+				el.className = cn;
+		},
+		_getClassName = function(el) {
+			return (typeof el.className.baseVal == "undefined") ? el.className : el.className.baseVal;
+		},
+        _findWithFunction = function(a, f) {
+            if (a)
+                for (var i = 0; i < a.length; i++) if (f(a[i])) return i;
+            return -1;
+        },
+		_indexOf = function(l, v) {
+            return support.io ? l.indexOf(v) : _findWithFunction(l, function(_v) { return _v == v; });
+        },
+		_classManip = function(el, add, clazz) {
+			if (support.cl) {
+				el.classList[add ? "add" : "remove"].apply(el.classList, clazz.split(/\s+/));
+			}
+			else {
+				var classesToAddOrRemove = clazz.split(/\s+/),
+					className = _getClassName(el),
+					curClasses = className.split(/\s+/);
+					
+				for (var i = 0; i < classesToAddOrRemove.length; i++) {
+					if (add) {
+						if (_indexOf(curClasses, classesToAddOrRemove[i]) == -1)
+							curClasses.push(classesToAddOrRemove[i]);
+					}
+					else {
+						var idx = _indexOf(curClasses, classesToAddOrRemove[i]);
+						if (idx != -1)
+							curClasses.splice(idx, 1);
+					}
+				}
+				_setClassName(el, curClasses.join(" "));
+			}
+		},
+		_each = function(spec, fn) {
+			if (spec == null) return;
+			if (typeof spec === "string") 
+				fn(document.getElementById(spec));
+			else if (spec.length != null) {
+				for (var i = 0; i < spec.length; i++)
+					fn(typeof spec[i] === "string" ? document.getElementById(spec[i]) : spec[i]);
+			}
+			else
+				fn(spec); // assume it's an element.
+		};
+    
+    /**
+    * @name DefaultKatavorioHelper#constructor
+    * @desc Constructor for DefaultKatavorioHelper.  Takes no parameters.
+    * @function
+    */
     this.DefaultKatavorioHelper = function() {
+
         this.addEvent = function( obj, type, fn ) {
             if (obj.addEventListener)
                 obj.addEventListener( type, fn, false );
@@ -51,8 +120,41 @@
             return [ el.offsetWidth, el.offsetHeight ];
         };
         
-        this.addClass = function(el, c) { el.classList.add(c) };
-        this.removeClass = function(el, c) { el.classList.remove(c); };
+        this.addClass = function(el, c) { 
+            _each(el, function(e) {
+				_classManip(e, true, c);
+			});
+        };
+        
+        this.removeClass = function(el, c) { 
+            _each(el, function(e) {
+				_classManip(e, false, c);
+			});
+        };
     };
+    
+    // thanks MDC
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind?redirectlocale=en-US&redirectslug=JavaScript%2FReference%2FGlobal_Objects%2FFunction%2Fbind
+    if (!Function.prototype.bind) {
+      Function.prototype.bind = function (oThis) {
+        if (typeof this !== "function") {
+          // closest thing possible to the ECMAScript 5 internal IsCallable function
+          throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+        }
+
+        var aArgs = Array.prototype.slice.call(arguments, 1), 
+            fToBind = this, 
+            fNOP = function () {},
+            fBound = function () {
+              return fToBind.apply(this instanceof fNOP && oThis ? this : oThis,
+                                   aArgs.concat(Array.prototype.slice.call(arguments)));
+            };
+
+        fNOP.prototype = this.prototype;
+        fBound.prototype = new fNOP();
+
+        return fBound;
+      };
+    }
     
 }).call(this);

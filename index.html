@@ -24,7 +24,7 @@
                 opacity:0.7;
             }
             
-            #parentConstrain {
+            #parentConstrain, #grid {
                 width:700px;
                 height:500px;                
                 position:relative;
@@ -35,9 +35,9 @@
                 -ms-transform-origin:0% 0% 0;
             }
             
-            #one, #eleven { top:50px;left:50px; }
-            #two, #twelve { top:350px;left:350px; }
-            #three, #thirteen { top:50px; left:300px; }
+            #one, #twenty { top:50px;left:50px; }
+            #two, #twelve, #twentyone { top:350px;left:350px; }
+            #three, #thirteen, #twentytwo { top:50px; left:300px; }
             #four, #fourteen { top: 300px; left:70px; }
             #five { top:420px; left:250px; }
             #six { top:250px; left:450px; }
@@ -45,6 +45,13 @@
             #eight { left:790px; top:60px;}
             #nine { left:920px; top:10px;}
             #ten { left:820px; top:200px;}
+            #eleven { top:150px;left:150px; }
+            
+            .filt {
+                width:10px; height:10px;
+                background-color:blue;
+                cursor:pointer;
+            }
             
             .jsplumb-drag-selected {
                 background-color:yellow;
@@ -116,12 +123,24 @@
             <div class="w" id="four" scope="BAZ" drag constrain>BAZ</div>
             <div class="w" id="five" scope="FOO BAR BAZ" drag constrain>FOO BAR BAZ</div>
             <div class="w" id="six" scope="FOO" drop>FOO</div>
+            <div class="w" id="eleven" scope="FOO" drag drop constrain filter=".filt">
+                FILTER FOO
+                <div class="filt"></div>
+            </div>
+            
        </div>
     
         <div class="w free" id="seven" scope="FOO QUX" drag>FOO QUX</div>
         <div class="w free" id="eight" scope="QUX" drop>QUX</div>
         <div class="w free" id="nine" scope="POO QUX" drag>POO QUX</div>
         <div class="w free" id="ten" scope="POO" drop constrain=".idontexist">POO</div>
+        
+        <div id="grid" class="c">
+            <p>these elements are constrained and are on a 30x30 grid</p>
+            <div class="w" id="twenty" scope="FOO BAR" drag constrain grid="30,30">FOO BAR</div>
+            <div class="w" id="twentyone" scope="BAR BAZ" drop grid="30,30">BAR BAZ</div>
+            <div class="w" id="twentytwo" scope="BAZ" drop drag constrain grid="30,30">BAZ</div>
+         </div>
     
         <script>
             function init() {
@@ -164,12 +183,19 @@
                 var w = document.querySelectorAll(".w");
                 for (var i = 0; i < w.length; i++) {
                     var scope = w[i].getAttribute("scope");
-                    if (w[i].getAttribute("drag") != null)
+                    if (w[i].getAttribute("drag") != null) {                        
                         k.draggable(w[i], {
                             scope:scope, 
                             constrain:w[i].getAttribute("constrain") != null,
-                            canDrag:beforeCanDrag
+                            canDrag:beforeCanDrag,
+                            drag:function() {
+                                console.log("DRAG");
+                                console.dir(arguments);
+                            },
+                            filter:w[i].getAttribute("filter"),
+                            grid :w[i].getAttribute("grid") ? w[i].getAttribute("grid").split(/,/) : null
                         });
+                    }
                     if (w[i].getAttribute("drop") != null)
                         k.droppable(w[i], {
                             scope:scope, 
