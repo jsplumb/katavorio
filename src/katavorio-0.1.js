@@ -250,7 +250,7 @@
                     var _dd = _dropsByScope[drag.scopes[i]];
                     if (_dd) {
                         for (var j = 0; j < _dd.length; j++) {
-                            if (_dd[j].canDrop(drag) &&  !_m[_dd[j].el._katavorio]) {
+                            if (_dd[j].canDrop(drag) &&  !_m[_dd[j].el._katavorio] && _dd[j].el !== drag.el) {
                                 _m[_dd[j].el._katavorio] = true;
                                 dd.push(_dd[j]);
                             }
