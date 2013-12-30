@@ -131,6 +131,8 @@
 				_classManip(e, false, c);
 			});
         };
+		
+		this.indexOf = _indexOf;
     };
     
     // thanks MDC

@@ -1,6 +1,6 @@
 /**
  drag/drop functionality for use with jsPlumb but with
- no knowledge of jsPlumb. supports multiple scopes, dragging
+ no knowledge of jsPlumb. supports multiple scopes (separated by whitespace), dragging
  multiple elements, constrain to parent, drop filters, drag start filters, custom
  css classes.
  
@@ -73,9 +73,15 @@
         params.addClass(el, this._class);
         this.el = el;
         var enabled = true;
-        this.scopes = params.scope ? params.scope.split(/\s+/) : [ _scope ];
         this.setEnabled = function(e) { enabled = e; };
         this.isEnabled = function() { return enabled; };
+		
+		this.setScope = function(scopes) {
+			this.scopes = scopes ? scopes.split(/\s+/) : [ _scope ];
+		};
+		
+		this.setScope(params.scope);
+		this.k = params.katavorio;
         return params.katavorio;
     };
         
@@ -161,8 +167,7 @@
         };
         this.moveBy = function(dx, dy, e) {
             intersectingDroppables.length = 0;
-            var //cPos = constrain([posAtDown[0] + dx, posAtDown[1] + dy]),
-			cPos = constrain(toGrid(([posAtDown[0] + dx, posAtDown[1] + dy]))),
+            var cPos = constrain(toGrid(([posAtDown[0] + dx, posAtDown[1] + dy]))),
                 rect = { x:cPos[0], y:cPos[1], w:this.size[0], h:this.size[1]};
             params.setPosition(el, cPos);
             for (var i = 0; i < matchingDroppables.length; i++) {
@@ -244,6 +249,16 @@
                     map[obj.scopes[i]].push(obj);
                 }
             },
+			_unreg = function(obj, map) {
+				for(var i = 0; i < obj.scopes.length; i++) {
+                    if (map[obj.scopes[i]]) {
+						debugger;
+						var idx = katavorioParams.indexOf(map[obj.scopes[i]], obj);
+						if (idx != -1)
+							map[obj.scopes[i]].splice(idx, 1);
+					}
+                }
+			},
             _getMatchingDroppables = this.getMatchingDroppables = function(drag) {
                 var dd = [], _m = {};
                 for (var i = 0; i < drag.scopes.length; i++) {
@@ -280,12 +295,14 @@
             var p = _prepareParams(params, this);
             el._katavorioDrag = new Drag(el, p);
             _reg(el._katavorioDrag, _dragsByScope);
+			return el._katavorioDrag;
         };
         
         this.droppable = function(el, params) {
             el = _gel(el);
             el._katavorioDrop = new Drop(el, _prepareParams(params));
             _reg(el._katavorioDrop, _dropsByScope);
+			return el._katavorioDrop;
         };
         
         /**
@@ -350,5 +367,41 @@
         };
 
         this.getZoom = function() { return _zoom; };
+		
+		// does the work of changing scopes
+		var _setScope = function(kObj, scopes, map) {
+			if (kObj != null) {
+				// deregister existing scopes
+				_unreg(kObj, map);
+				// set scopes
+				kObj.setScope(scopes);
+				// register new ones
+				_reg(kObj, map);
+			}
+		};
+		
+		// sets the scope of the given object, both for drag and drop if it
+		// is registered for both. to target just drag or drop, see setDragScope
+		// and setDropScope
+		this.setScope = function(el, scopes) {
+			_setScope(el._katavorioDrag, scopes, _dragsByScope);
+			_setScope(el._katavorioDrop, scopes, _dropsByScope);
+		};
+		
+		this.setDragScope = function(el, scopes) {
+			_setScope(el._katavorioDrag, scopes, _dragsByScope);
+		};
+		
+		this.setDropScope = function(el, scopes) {
+			_setScope(el._katavorioDrop, scopes, _dropsByScope);
+		};
+		
+		this.getDragsForScope = function(s) {
+			return _dragsByScope[s];
+		}; 
+		
+		this.getDropsForScope = function(s) {
+			return _dropsByScope[s];
+		};
     };
 }).call(this);
