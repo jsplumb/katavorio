@@ -75,6 +75,7 @@
         var enabled = true;
         this.setEnabled = function(e) { enabled = e; };
         this.isEnabled = function() { return enabled; };
+		this.toggleEnabled = function() { enabled = !enabled; };
 		
 		this.setScope = function(scopes) {
 			this.scopes = scopes ? scopes.split(/\s+/) : [ _scope ];
@@ -114,18 +115,18 @@
             },
             canDrag = params.canDrag || _true,
             constrainRect,
-            matchingDroppables = [], intersectingDroppables = [],            
+            matchingDroppables = [], intersectingDroppables = [],
             downListener = function(e) {
                 if (this.isEnabled() && canDrag() && filter(e)) {
                     downAt = _pl(e);
                     this.mark();
                     params.bind(document, "mousemove", moveListener);
-                    params.bind(document, "mouseup", upListener);                    
-                    k.markSelection(this);                    
+                    params.bind(document, "mouseup", upListener);
+                    k.markSelection(this);
                     params.addClass(document.body, _classes.noSelect);
                     params.events["start"]({el:el, pos:posAtDown, e:e, drag:this});
                 }
-            }.bind(this),            
+            }.bind(this),
             moveListener = function(e) {
                 if (downAt) {
                     intersectingDroppables.length = 0;
@@ -135,12 +136,13 @@
                     dy /= z;
                     this.moveBy(dx, dy, e);
                     k.updateSelection(dx, dy, this);
-                }                
+                }   
+				e.preventDefault();
             }.bind(this),
             upListener = function(e) {
                 downAt = null;
                 params.unbind(document, "mousemove", moveListener);
-                params.unbind(document, "mouseup", upListener);            
+                params.unbind(document, "mouseup", upListener);
                 params.removeClass(document.body, _classes.noSelect);
                 this.unmark(e);
                 k.unmarkSelection(this, e);
@@ -164,49 +166,52 @@
             for (var i = 0; i < intersectingDroppables.length; i++)
                 intersectingDroppables[i].drop(this, e);
             params.removeClass(el, params.dragClass || _classes.drag);
-        };
-        this.moveBy = function(dx, dy, e) {
-            intersectingDroppables.length = 0;
-            var cPos = constrain(toGrid(([posAtDown[0] + dx, posAtDown[1] + dy]))),
-                rect = { x:cPos[0], y:cPos[1], w:this.size[0], h:this.size[1]};
-            params.setPosition(el, cPos);
-            for (var i = 0; i < matchingDroppables.length; i++) {
-                var r2 = { x:matchingDroppables[i].position[0], y:matchingDroppables[i].position[1], w:matchingDroppables[i].size[0], h:matchingDroppables[i].size[1]};
-                if (params.intersects(rect, r2) && matchingDroppables[i].canDrop(this)) {
-                    intersectingDroppables.push(matchingDroppables[i]);
-                    matchingDroppables[i].setHover(this, true, e);
-                }
-                else if (matchingDroppables[i].el._katavorioDragHover) {
-                    matchingDroppables[i].setHover(this, false, e);
-                }
-            }
-          	params.events["drag"]({el:el, pos:cPos, e:e, drag:this});
-        };
+		};
+		this.moveBy = function(dx, dy, e) {
+			intersectingDroppables.length = 0;
+			var cPos = constrain(toGrid(([posAtDown[0] + dx, posAtDown[1] + dy]))),
+				rect = { x:cPos[0], y:cPos[1], w:this.size[0], h:this.size[1]};
+			params.setPosition(el, cPos);
+			for (var i = 0; i < matchingDroppables.length; i++) {
+				var r2 = { x:matchingDroppables[i].position[0], y:matchingDroppables[i].position[1], w:matchingDroppables[i].size[0], h:matchingDroppables[i].size[1]};
+				if (params.intersects(rect, r2) && matchingDroppables[i].canDrop(this)) {
+					intersectingDroppables.push(matchingDroppables[i]);
+					matchingDroppables[i].setHover(this, true, e);
+				}
+				else if (matchingDroppables[i].el._katavorioDragHover) {
+					matchingDroppables[i].setHover(this, false, e);
+				}
+			}
+			params.events["drag"]({el:el, pos:cPos, e:e, drag:this});
+		};
+		this.destroy = function() {
+			params.unbind(el, "mousedown", downListener);
+		};
 
 		// init:register mousedown, and perhaps set a filter
 		params.bind(el, "mousedown", downListener);
-        _setFilter(params.filter);
-    };
-    
-    var Drop = function(el, params) {
-        this._class = _classes.droppable;
-        this._activeClass = params.activeClass || _classes.active;
-        this._hoverClass = params.hoverClass || _classes.hover;
-        var k = Super.apply(this, arguments), hover = false;
-                
-        this.setActive = function(val) {
-            params[val ? "addClass" : "removeClass"](el, this._activeClass);
-        };
-        
-        this.updatePosition = function() {
-            this.position = params.getPosition(el);
-            this.size = params.getSize(el);
-        };
-        
-        this.canDrop = params.canDrop || function(drag) {
-           return true;
-        };
-        
+		_setFilter(params.filter);
+	};
+
+	var Drop = function(el, params) {
+		this._class = _classes.droppable;
+		this._activeClass = params.activeClass || _classes.active;
+		this._hoverClass = params.hoverClass || _classes.hover;
+		var k = Super.apply(this, arguments), hover = false;
+
+		this.setActive = function(val) {
+			params[val ? "addClass" : "removeClass"](el, this._activeClass);
+		};
+
+		this.updatePosition = function() {
+			this.position = params.getPosition(el);
+			this.size = params.getSize(el);
+		};
+
+		this.canDrop = params.canDrop || function(drag) {
+			return true;
+		};
+
         this.setHover = function(drag, val, e) {
             // if turning off hover but this was not the drag that caused the hover, ignore.
             if (val || el._katavorioDragHover == null || el._katavorioDragHover == drag.el._katavorio) {
@@ -221,6 +226,8 @@
         this.drop = function(drag, event) {
             params.events["drop"]({ drag:drag, event:event, drop:this });
         };
+		
+		this.destroy = function() {};
     };
     
     var _uuid = function() {
@@ -252,7 +259,6 @@
 			_unreg = function(obj, map) {
 				for(var i = 0; i < obj.scopes.length; i++) {
                     if (map[obj.scopes[i]]) {
-						debugger;
 						var idx = katavorioParams.indexOf(map[obj.scopes[i]], obj);
 						if (idx != -1)
 							map[obj.scopes[i]].splice(idx, 1);
@@ -328,55 +334,47 @@
         * @desc Removes an element from the current selection (for multiple node drag)
         * @param {Element|String} DOM element - or id of the element - to remove.
         */
-        this.deselect = function(el) {
-            el = _gel(el);
-            if (el && el._katavorio) {
-                var e = _selectionMap[el._katavorio];
-                if (e) {
+		this.deselect = function(el) {
+			el = _gel(el);
+			if (el && el._katavorio) {
+				var e = _selectionMap[el._katavorio];
+				if (e) {
                     params.removeClass(el, _classes.dragSelect);
                     _selection.splice(e[1], 1);
                     delete _selectionMap[el._katavorio];
                     katavorioParams.removeClass(el, _classes.selected);
                 }
             }
-        };
-        
-        this.deselectAll = function() {
-            _selection.length = 0;
-            _selectionMap = {};
-        };
+		};
 
-        this.markSelection = function(drag) {
-            _each(_selection, function(e) { e.mark(); }, drag);
-        };
+		this.deselectAll = function() {
+			_selection.length = 0;
+			_selectionMap = {};
+		};
 
-        this.unmarkSelection = function(drag, event) {
-            _each(_selection, function(e) { e.unmark(event); }, drag);
-        };
+		this.markSelection = function(drag) {
+			_each(_selection, function(e) { e.mark(); }, drag);
+		};
 
-        this.getSelection = function() {
-            return _selection.slice(0);
-        };
+		this.unmarkSelection = function(drag, event) {
+			_each(_selection, function(e) { e.unmark(event); }, drag);
+		};
 
-        this.updateSelection = function(dx, dy, drag) {
-            _each(_selection, function(e) { e.moveBy(dx, dy); }, drag);
-        };
+		this.getSelection = function() { return _selection.slice(0); };
 
-        this.setZoom = function(z) {
-            _zoom = z;
-        };
+		this.updateSelection = function(dx, dy, drag) {
+			_each(_selection, function(e) { e.moveBy(dx, dy); }, drag);
+		};
 
-        this.getZoom = function() { return _zoom; };
-		
+		this.setZoom = function(z) { _zoom = z; };
+		this.getZoom = function() { return _zoom; };
+
 		// does the work of changing scopes
 		var _setScope = function(kObj, scopes, map) {
 			if (kObj != null) {
-				// deregister existing scopes
-				_unreg(kObj, map);
-				// set scopes
-				kObj.setScope(scopes);
-				// register new ones
-				_reg(kObj, map);
+				_unreg(kObj, map);  // deregister existing scopes
+				kObj.setScope(scopes); // set scopes
+				_reg(kObj, map); // register new ones
 			}
 		};
 		
@@ -388,20 +386,26 @@
 			_setScope(el._katavorioDrop, scopes, _dropsByScope);
 		};
 		
-		this.setDragScope = function(el, scopes) {
-			_setScope(el._katavorioDrag, scopes, _dragsByScope);
+		this.setDragScope = function(el, scopes) { _setScope(el._katavorioDrag, scopes, _dragsByScope); };
+		this.setDropScope = function(el, scopes) { _setScope(el._katavorioDrop, scopes, _dropsByScope); };
+		this.getDragsForScope = function(s) { return _dragsByScope[s]; }; 
+		this.getDropsForScope = function(s) { return _dropsByScope[s]; };
+		
+		var _destroy = function(el, type, map) {
+			el = _gel(el);
+			if (el[type]) {
+				el[type].destroy();
+				_unreg(el[type], map);
+				el[type] = null;
+			}
 		};
 		
-		this.setDropScope = function(el, scopes) {
-			_setScope(el._katavorioDrop, scopes, _dropsByScope);
+		this.destroyDraggable = function(el) {
+			_destroy(el, "_katavorioDrag", _dragsByScope);
 		};
 		
-		this.getDragsForScope = function(s) {
-			return _dragsByScope[s];
-		}; 
-		
-		this.getDropsForScope = function(s) {
-			return _dropsByScope[s];
+		this.destroyDroppable = function(el) {
+			_destroy(el, "_katavorioDrop", _dropsByScope);
 		};
     };
 }).call(this);
