@@ -339,7 +339,6 @@
 			if (el && el._katavorio) {
 				var e = _selectionMap[el._katavorio];
 				if (e) {
-                    params.removeClass(el, _classes.dragSelect);
                     _selection.splice(e[1], 1);
                     delete _selectionMap[el._katavorio];
                     katavorioParams.removeClass(el, _classes.selected);
