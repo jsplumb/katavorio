@@ -1,0 +1,238 @@
+<!doctype html>
+<html>
+    
+    <head>
+        <script src="src/default-katavorio-helper.js"></script>
+        <script src="src/katavorio-0.1.js"></script>
+        <style>            
+        
+            .jsplumb-drag-no-select * {
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;    
+            }
+        
+            .w {
+                position:absolute;width:50px;height:50px;border:1px solid black;
+                font-size:12px;
+                border-radius:5px;
+                text-align:center;
+                background-color:WhiteSmoke;
+                opacity:0.7;
+            }
+            
+            #parentConstrain, #grid {
+                width:700px;
+                height:500px;                
+                position:relative;
+                text-align:center;                
+                -webkit-transform-origin:0% 0% 0;
+                transform-origin:0% 0% 0;
+                -moz-transform-origin:0% 0% 0;
+                -ms-transform-origin:0% 0% 0;
+            }
+            
+            #one, #twenty { top:50px;left:50px; }
+            #two, #twelve, #twentyone { top:350px;left:350px; }
+            #three, #thirteen, #twentytwo { top:50px; left:300px; }
+            #four, #fourteen { top: 300px; left:70px; }
+            #five { top:420px; left:250px; }
+            #six { top:250px; left:450px; }
+            #seven { left:720px; top:0px;}
+            #eight { left:790px; top:60px;}
+            #nine { left:920px; top:10px;}
+            #ten { left:820px; top:200px;}
+            #eleven { top:150px;left:150px; }
+            
+            .filt {
+                width:10px; height:10px;
+                background-color:blue;
+                cursor:pointer;
+            }
+            
+            .jsplumb-drag-selected {
+                background-color:yellow;
+            }
+            
+            .jsplumb-drag-select {
+                border:2px solid blue;
+            }
+            
+            .jsplumb-draggable:after {
+                content:"\A DRAG"
+            }
+            
+            .jsplumb-droppable:after {
+                content:"\A DROP"
+            }
+            
+             .jsplumb-draggable.jsplumb-droppable:after {
+                 content:"\A DRAG \A DROP"
+             }
+            
+            .jsplumb-drag {
+                background-color:#999;
+                color:white;
+            }
+            .jsplumb-drag-active {
+                border:3px solid green;
+            }
+            .jsplumb-drag-hover {
+                background:#E77;
+                color:whitesmoke
+            }
+            
+            #parentConstrain p {                
+                font-size:70px;
+                color:#CCC;                                           
+            }
+            
+            .c {
+                border:2px solid #749957; 
+                text-transform:uppercase;
+                font-family:Verdana;     
+                border-radius:7px;
+                margin-bottom:10px;
+            }
+        </style>
+    </head>
+    <body onload="init();">
+    
+        <div id="zoom" class="c">
+        zoom:
+            <label><input type="radio" value="25" name="zoom">25%</label>
+            <label><input type="radio" value="50" name="zoom">50%</label>
+            <label><input type="radio" value="75" name="zoom">75%</label>
+            <label><input type="radio" value="100" checked name="zoom">100%</label>
+            <label><input type="radio" value="150" name="zoom">150%</label>
+        </div>
+        
+        <div class="c">
+            <label><input type="checkbox" id="chkDrop" checked>drop enabled</label>
+            <label><input type="checkbox" id="chkDrag" checked>drag enabled</label>
+        </div>
+        
+        <div id="parentConstrain" class="c">
+            <p>these elements are constrained to their parent</p>
+            <div class="w" id="one" scope="FOO BAR" drag constrain>FOO BAR</div>
+            <div class="w" id="two" scope="BAR BAZ" drop>BAR BAZ</div>
+            <div class="w" id="three" scope="BAZ" drop drag constrain>BAZ</div>
+            <div class="w" id="four" scope="BAZ" drag constrain>BAZ</div>
+            <div class="w" id="five" scope="FOO BAR BAZ" drag constrain>FOO BAR BAZ</div>
+            <div class="w" id="six" scope="FOO" drop>FOO</div>
+            <div class="w" id="eleven" scope="FOO" drag drop constrain filter=".filt">
+                FILTER FOO
+                <div class="filt"></div>
+            </div>
+            
+       </div>
+    
+        <div class="w free" id="seven" scope="FOO QUX" drag>FOO QUX</div>
+        <div class="w free" id="eight" scope="QUX" drop>QUX</div>
+        <div class="w free" id="nine" scope="POO QUX" drag>POO QUX</div>
+        <div class="w free" id="ten" scope="POO" drop constrain=".idontexist">POO</div>
+        
+        <div id="grid" class="c">
+            <p>these elements are constrained and are on a 30x30 grid</p>
+            <div class="w" id="twenty" scope="FOO BAR" drag constrain grid="30,30">FOO BAR</div>
+            <div class="w" id="twentyone" scope="BAR BAZ" drop grid="30,30">BAR BAZ</div>
+            <div class="w" id="twentytwo" scope="BAZ" drop drag constrain grid="30,30">BAZ</div>
+         </div>
+    
+        <script>
+            function init() {
+                
+                var seh = new DefaultKatavorioHelper();
+                
+                //setup disable/enable drop
+                var chkDrop = document.getElementById("chkDrop"), canDrop = true;
+                var chkDrag = document.getElementById("chkDrag"), canDrag = true;
+                seh.addEvent(chkDrop, "change", function() {
+                    canDrop = chkDrop.checked;
+                });
+                var canDropCb = function() {
+                    return canDrop;
+                };
+                
+                seh.addEvent(chkDrag, "change", function() {
+                    canDrag = chkDrag.checked;
+                });
+                var beforeCanDrag = function() {
+                    return canDrag;
+                };
+                
+                                
+                var k = window.k = new Katavorio({
+                    getPosition:seh.getPosition,
+                    setPosition:seh.setPosition,
+                    getSize:seh.getSize,
+                    addClass:seh.addClass,
+                    removeClass:seh.removeClass,
+                    bind:seh.addEvent,
+                    unbind:seh.removeEvent,
+                    fireEvent:function() { 
+                        console.log(arguments); 
+                    },
+                    intersects:seh.intersects,
+                    indexOf:seh.indexOf
+                });
+              
+                // setup demo elements for drag and/or drop
+                var w = document.querySelectorAll(".w");
+                for (var i = 0; i < w.length; i++) {
+                    var scope = w[i].getAttribute("scope");
+                    if (w[i].getAttribute("drag") != null) {                        
+                        k.draggable(w[i], {
+                            scope:scope, 
+                            constrain:w[i].getAttribute("constrain") != null,
+                            canDrag:beforeCanDrag,
+                            drag:function() {
+                                console.log("DRAG");
+                                console.dir(arguments);
+                            },
+                            filter:w[i].getAttribute("filter"),
+                            grid :w[i].getAttribute("grid") ? w[i].getAttribute("grid").split(/,/) : null
+                        });
+                    }
+                    if (w[i].getAttribute("drop") != null)
+                        k.droppable(w[i], {
+                            scope:scope, 
+                            canDrop:canDropCb,
+                            over:function() {
+                                console.log("OVER!");
+                                console.log(arguments);
+                            },
+                            out:function() {
+                                console.log("OUT!");
+                                console.log(arguments);
+                            },
+                            drop:function() {
+                                console.log("DROP!");
+                                console.log(arguments);
+                            }
+                        });
+                }
+                
+                // setup zoom
+                var j = document.querySelectorAll("input[type='radio']");
+                var _f = function(inp) {
+                    seh.addEvent(inp, "change", function() {
+                        var z = (inp.getAttribute("value") / 100);
+                        k.setZoom(z);
+                        document.getElementById("parentConstrain").style["transform"] = "scale(" + z + ")";
+                        document.getElementById("parentConstrain").style["-webkit-transform"] = "scale(" + z + ")";
+                    });
+                }
+                for (var i = 0; i < j.length; i++) {
+                    _f(j[i]);
+                }
+                                
+            }
+        </script>
+        
+    </body>
+    
+</html>    

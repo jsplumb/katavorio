@@ -55,19 +55,24 @@
                    [ e.pageX, e.pageY ] :
                    [ e.clientX + document.documentElement.scrollLeft, e.clientY + document.documentElement.scrollTop ];
         },                
-        _each = function(l, fn, from) {
+        _foreach = function(l, fn, from) {
             for (var i = 0; i < l.length; i++) {
                 if (l[i] != from)
                     fn(l[i]);
             }
         },
         _setDroppablesActive = function(dd, val, andHover, drag) {
-            _each(dd, function(e) {
+            _foreach(dd, function(e) {
                 e.setActive(val);
                 if (val) e.updatePosition();
                 if (andHover) e.setHover(drag, val);
             });
-        };
+        },
+		_each = function(obj, fn) {
+			obj = (typeof obj !== "string") && (obj.tagName == null && obj.length != null) ? obj : [ obj ];
+			for (var i = 0; i < obj.length; i++)
+				fn.apply(obj[i]);
+		};
         
     var Super = function(el, params) {
         params.addClass(el, this._class);
@@ -250,6 +255,7 @@
             _dragsByScope = {},
             _dropsByScope = {},
             _zoom = 1,
+			self = this,
             _reg = function(obj, map) {
                 for(var i = 0; i < obj.scopes.length; i++) {
                     map[obj.scopes[i]] = map[obj.scopes[i]] || [];
@@ -297,18 +303,27 @@
             }.bind(this);
         
         this.draggable = function(el, params) {
-            el = _gel(el);
-            var p = _prepareParams(params, this);
-            el._katavorioDrag = new Drag(el, p);
-            _reg(el._katavorioDrag, _dragsByScope);
-			return el._katavorioDrag;
+			var o = [];
+			_each(el, function() {
+				var _el = _gel(this);
+				var p = _prepareParams(params);
+            	_el._katavorioDrag = new Drag(_el, p);
+            	_reg(_el._katavorioDrag, _dragsByScope);
+				o.push(_el._katavorioDrag);
+			});
+			return o;
+            
         };
         
         this.droppable = function(el, params) {
-            el = _gel(el);
-            el._katavorioDrop = new Drop(el, _prepareParams(params));
-            _reg(el._katavorioDrop, _dropsByScope);
-			return el._katavorioDrop;
+			var o = [];
+			_each(el, function() {
+				var _el = _gel(this);
+            	_el._katavorioDrop = new Drop(_el, _prepareParams(params));
+            	_reg(_el._katavorioDrop, _dropsByScope);
+				o.push(_el._katavorioDrop);
+			});
+			return o;
         };
         
         /**
@@ -318,14 +333,17 @@
         * @param {Element|String} DOM element - or id of the element - to add.
         */
         this.select = function(el) {
-            el = _gel(el);
-            if (el && el._katavorioDrag) {
-                if (!_selectionMap[el._katavorio]) {
-                    _selection.push(el._katavorioDrag);
-                    _selectionMap[el._katavorio] = [ el, _selection.length - 1 ];
-                    katavorioParams.addClass(el, _classes.selected);
-                }
-            }
+			_each(el, function() {
+				var _el = _gel(this);
+				if (_el && _el._katavorioDrag) {
+					if (!_selectionMap[_el._katavorio]) {
+						_selection.push(_el._katavorioDrag);
+						_selectionMap[_el._katavorio] = [ _el, _selection.length - 1 ];
+						katavorioParams.addClass(_el, _classes.selected);
+					}
+				}
+			});
+            return this;
         };
         
         /**
@@ -335,15 +353,21 @@
         * @param {Element|String} DOM element - or id of the element - to remove.
         */
 		this.deselect = function(el) {
-			el = _gel(el);
-			if (el && el._katavorio) {
-				var e = _selectionMap[el._katavorio];
-				if (e) {
-                    _selection.splice(e[1], 1);
-                    delete _selectionMap[el._katavorio];
-                    katavorioParams.removeClass(el, _classes.selected);
-                }
-            }
+			_each(el, function() {
+				var _el = _gel(this);
+				if (_el && _el._katavorio) {
+					var e = _selectionMap[_el._katavorio];
+					if (e) {
+						var _s = [];
+						for (var i = 0; i < _selection.length; i++)
+							if (_selection[i].el !== _el) _s.push(_selection[i]);
+						_selection = _s;
+						delete _selectionMap[_el._katavorio];
+						katavorioParams.removeClass(_el, _classes.selected);
+					}
+				}
+			});
+			return this;
 		};
 
 		this.deselectAll = function() {
@@ -352,17 +376,17 @@
 		};
 
 		this.markSelection = function(drag) {
-			_each(_selection, function(e) { e.mark(); }, drag);
+			_foreach(_selection, function(e) { e.mark(); }, drag);
 		};
 
 		this.unmarkSelection = function(drag, event) {
-			_each(_selection, function(e) { e.unmark(event); }, drag);
+			_foreach(_selection, function(e) { e.unmark(event); }, drag);
 		};
 
 		this.getSelection = function() { return _selection.slice(0); };
 
 		this.updateSelection = function(dx, dy, drag) {
-			_each(_selection, function(e) { e.moveBy(dx, dy); }, drag);
+			_foreach(_selection, function(e) { e.moveBy(dx, dy); }, drag);
 		};
 
 		this.setZoom = function(z) { _zoom = z; };
