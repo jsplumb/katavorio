@@ -168,6 +168,50 @@ var testSuite = function() {
 		ok(d2._katavorioDrop != null, "drop initialized");
 	});
 	
+	test("make draggable, non-existent node", function() {
+		var f = 0;
+		try {
+			k.draggable("foo");
+		}
+		catch (e) {
+			f = 1;
+		}
+		equal(f, 0, "no exception thrown");
+	});
+	
+	test("make draggable, null argument", function() {
+		var f = 0;
+		try {
+			k.draggable(null);
+		}
+		catch (e) {
+			f = 1;
+		}
+		equal(f, 0, "no exception thrown");
+	});
+	
+	test("make droppable, non-existent node", function() {
+		var f = 0;
+		try {
+			k.droppable("foo");
+		}
+		catch (e) {
+			f = 1;
+		}
+		equal(f, 0, "no exception thrown");
+	});
+	
+	test("make droppable, null argument", function() {
+		var f = 0;
+		try {
+			k.droppable(null);
+		}
+		catch (e) {
+			f = 1;
+		}
+		equal(f, 0, "no exception thrown");
+	});
+	
 // --------------------------- / DRAGGABLE/DROPPABLE -----------------------------------------------
 
 // --------------------------- DRAG SELECTION -----------------------------------------------

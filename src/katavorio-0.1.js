@@ -69,6 +69,7 @@
             });
         },
 		_each = function(obj, fn) {
+			if (obj == null) return;
 			obj = (typeof obj !== "string") && (obj.tagName == null && obj.length != null) ? obj : [ obj ];
 			for (var i = 0; i < obj.length; i++)
 				fn.apply(obj[i]);
@@ -243,7 +244,9 @@
     };
     
     var _gel = function(el) {
+		if (el == null) return null;
         el = typeof el === "string" ? document.getElementById(el) : el;
+		if (el == null) return null;
         el._katavorio = el._katavorio || _uuid();
         return el;
     };
@@ -306,10 +309,12 @@
 			var o = [];
 			_each(el, function() {
 				var _el = _gel(this);
-				var p = _prepareParams(params);
-            	_el._katavorioDrag = new Drag(_el, p);
-            	_reg(_el._katavorioDrag, _dragsByScope);
-				o.push(_el._katavorioDrag);
+				if (_el != null) {
+					var p = _prepareParams(params);
+					_el._katavorioDrag = new Drag(_el, p);
+					_reg(_el._katavorioDrag, _dragsByScope);
+					o.push(_el._katavorioDrag);
+				}
 			});
 			return o;
             
@@ -319,9 +324,11 @@
 			var o = [];
 			_each(el, function() {
 				var _el = _gel(this);
-            	_el._katavorioDrop = new Drop(_el, _prepareParams(params));
-            	_reg(_el._katavorioDrop, _dropsByScope);
-				o.push(_el._katavorioDrop);
+				if (_el != null) {
+					_el._katavorioDrop = new Drop(_el, _prepareParams(params));
+					_reg(_el._katavorioDrop, _dropsByScope);
+					o.push(_el._katavorioDrop);
+				}
 			});
 			return o;
         };
