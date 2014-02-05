@@ -125,12 +125,13 @@
             downListener = function(e) {
                 if (this.isEnabled() && canDrag() && filter(e)) {
                     downAt = _pl(e);
+					params.events["start"]({el:el, pos:posAtDown, e:e, drag:this});
                     this.mark();
                     params.bind(document, "mousemove", moveListener);
                     params.bind(document, "mouseup", upListener);
                     k.markSelection(this);
                     params.addClass(document.body, _classes.noSelect);
-                    params.events["start"]({el:el, pos:posAtDown, e:e, drag:this});
+                    
                 }
             }.bind(this),
             moveListener = function(e) {
@@ -154,6 +155,8 @@
                 k.unmarkSelection(this, e);
                 params.events["stop"]({el:el, pos:params.getPosition(el), e:e, drag:this});
             }.bind(this);
+			
+		this.abort = upListener;
 
         this.mark = function() {
             posAtDown = params.getPosition(el);
@@ -428,6 +431,11 @@
 				_unreg(el[type], map);
 				el[type] = null;
 			}
+		};
+		
+		this.elementRemoved = function(el) {
+			this.destroyDraggable(el);
+			this.destroyDroppable(el);
 		};
 		
 		this.destroyDraggable = function(el) {
