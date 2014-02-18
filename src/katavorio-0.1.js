@@ -130,15 +130,21 @@
             constrainRect,
             matchingDroppables = [], intersectingDroppables = [],
             downListener = function(e) {
-                if (this.isEnabled() && canDrag() && filter(e)) {
-                    downAt = _pl(e);
-					params.events["start"]({el:el, pos:posAtDown, e:e, drag:this});
-                    //
-                    params.bind(document, "mousemove", moveListener);
-                    params.bind(document, "mouseup", upListener);
-                    k.markSelection(this);
-                    params.addClass(document.body, css.noSelect);
-                    
+                if (this.isEnabled() && canDrag()) {
+					var _f =  filter(e);
+					if (_f) {
+						downAt = _pl(e);
+						params.events["start"]({el:el, pos:posAtDown, e:e, drag:this});
+						//
+						params.bind(document, "mousemove", moveListener);
+						params.bind(document, "mouseup", upListener);
+						k.markSelection(this);
+						params.addClass(document.body, css.noSelect);
+					}
+					else if (params.consumeFilteredEvents) {
+						e.preventDefault();
+						e.stopPropagation();
+					}
                 }
             }.bind(this),
             moveListener = function(e) {
@@ -404,6 +410,11 @@
 		};
 
 		this.deselectAll = function() {
+			for (var i in _selectionMap) {
+				var d = _selectionMap[i];
+				katavorioParams.removeClass(d[0], _css.selected);
+			}
+				
 			_selection.length = 0;
 			_selectionMap = {};
 		};
