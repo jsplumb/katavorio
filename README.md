@@ -17,7 +17,9 @@ All is not lost, though, as this project also contains `DefaultKatavorioHelper` 
 
 First you need to instantiate an instance of Katavorio:
 
-var kat = new Katavorio({  options });
+```
+var k = new Katavorio({  options });
+```
 
 
 ##### CSS
@@ -27,13 +29,13 @@ lifecycle:
 
 <table>
   <tr><th>class</th><th>default></th><th>description</th></tr>
-  <tr><td>draggable</td><td>katavorio-draggable"</td><td>Draggable elements</td></tr>
-  <tr><td>droppable</td><td>katavorio-droppable"</td><td>droppable elements</td></tr>
-  <tr><td>drag</td><td>katavorio-drag"</td><td>elements currently being dragged</td></tr>
-  <tr><td>selected</td><td>katavorio-drag-selected"</td><td>elements in current drag selection</td></tr>
-  <tr><td>active</td><td>katavorio-drag-active"</td><td>droppables that are targets of a currently dragged element</td></tr>
-  <tr><td>hover</td><td>katavorio-drag-hover"</td><td>droppables over which a matching drag element is hovering</td></tr>
-  <tr><td>noSelect</td><td>katavorio-drag-no-select"</td><td>added to the body to provide a hook to suppress text selection</td></tr>
+  <tr><td>draggable</td><td>katavorio-draggable</td><td>Draggable elements</td></tr>
+  <tr><td>droppable</td><td>katavorio-droppable</td><td>droppable elements</td></tr>
+  <tr><td>drag</td><td>katavorio-drag</td><td>elements currently being dragged</td></tr>
+  <tr><td>selected</td><td>katavorio-drag-selected</td><td>elements in current drag selection</td></tr>
+  <tr><td>active</td><td>katavorio-drag-active</td><td>droppables that are targets of a currently dragged element</td></tr>
+  <tr><td>hover</td><td>katavorio-drag-hover</td><td>droppables over which a matching drag element is hovering</td></tr>
+  <tr><td>noSelect</td><td>katavorio-drag-no-select</td><td>added to the body to provide a hook to suppress text selection</td></tr>
 </table>
 
 You can override any or all of these events by providing a JS object with the key `css` to the Katavorio constructor:
@@ -112,5 +114,34 @@ k.draggable(someElement, {
 });
 ```
 
+#### Filtering by element
+You can provide a `filter` parameter to the `draggable` method - a string selector defining an 
+element or set of elements from which dragging is not enabled:
+
+```
+var k = new Katavorio({ ...options... });
+k.draggable(someElement, {
+  filter:"button"
+});
+```
+
+Here we have told Katavorio to make `someElement` draggable, but not to start a drag if the
+mouse is on any child elements that are buttons.  
+
+Valid values for the `filter` argument are any valid CSS selectors.
+
+#### Consuming filtered events
+If you set a filter, you can also tell Katavorio to consume any events that were filtered (otherwise 
+they bubble up through the DOM). 
+
+```
+var k = new Katavorio({ ...options... });
+k.draggable(someElement, {
+  filter:"button",
+  consumeFilteredEvents:true
+});
+```
+
+This causes Katavorio to call `preventDefault()` and `stopPropagation()` on events that were filtered.
 
 
