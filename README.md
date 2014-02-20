@@ -51,7 +51,7 @@ var k = new Katavorio({
 });
 ```
 
-###### Overidding Drag CSS on a per-element basis
+###### Overridding Drag CSS on a per-element basis
 
 You can also override the class that is set on an element currently being dragged when you make the call to `draggable`:
 
@@ -62,7 +62,7 @@ k.draggable(someElement, {
 });
 ```
 
-###### Overidding Drop CSS on a per-element basis
+###### Overridding Drop CSS on a per-element basis
 
 Similiarly, you can override the hover/active classes that are set on a droppable element:
 
@@ -144,4 +144,31 @@ k.draggable(someElement, {
 
 This causes Katavorio to call `preventDefault()` and `stopPropagation()` on events that were filtered.
 
+#### Lifecycle Events
+
+##### Draggables
+
+Katavorio publishes events at three times during the drag lifecycle. You bind to them in the `draggable` call:
+
+```
+var k = new Katavorio({ options });
+k.draggable(someElement, {
+  start:function(params) {
+    
+  },
+  drag:function(params) {
+    
+  },
+  stop:function(params) {
+    
+  }
+})
+```
+
+The contents of `params` are as follows:
+
+- **drag** The associated Drag instance
+- **e** The associated MouseEvent
+- **el** The element that is being dragged.
+- **pos** [x,y] location of the element. Only supplied by the `drag` event.
 
