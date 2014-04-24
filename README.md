@@ -112,6 +112,17 @@ k.draggable(someElement, {
 });
 ```
 
+##### Drag with a clone
+
+If you want to drag a clone of your element, set `clone:true` on the `draggable` call:
+
+```
+var k = new Katavorio({...options...});
+k.draggable(someElement, {
+   clone:true
+});
+```
+
 #### Filtering by element
 You can provide a `filter` parameter to the `draggable` method - a string selector defining an 
 element or set of elements from which dragging is not enabled:
