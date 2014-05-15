@@ -3,10 +3,7 @@ katavorio
 
 Lightweight drag/drop handler, supporting containment, multiple element drag, custom css classes, drop filters, drag filters.
 
-Currently, Katavorio does not work "out of the box" - it was developed as part of jsPlumb 1.6.0, to support a "no dependency" version (all previous versions of jsPlumb required either jQuery, 
-MooTools or YUI, to provide a bunch of functionality such as CSS manipulation, getting/setting element positions, supporting drag/drop etc). So, rather
-than re-write simple methods such as `addClass`, `removeClass`, `getPosition` etc, Katavorio expects those methods to be provided in the
-constructor's options object.
+Currently, Katavorio does not work "out of the box" - it was developed as part of jsPlumb 1.6.0, to support a "no dependency" version (all previous versions of jsPlumb required either jQuery, MooTools or YUI, to provide a bunch of functionality such as CSS manipulation, getting/setting element positions, supporting drag/drop etc). So, rather than re-write simple methods such as `addClass`, `removeClass`, `getPosition` etc, Katavorio expects those methods to be provided in the constructor's options object.
 
 All is not lost, though, as this project also contains `DefaultKatavorioHelper` - the set of missing methods.
 
@@ -151,7 +148,29 @@ k.draggable(someElement, {
 });
 ```
 
-This causes Katavorio to call `preventDefault()` and `stopPropagation()` on events that were filtered.
+This causes Katavorio to call `preventDefault()` and `stopPropagation()` on events that were filtered (or to set the event's
+`returnValue` to false in IE < 9).
+
+### Zoom
+Katavorio takes zoom into account when dragging elements. This is not handled by attempting to infer what, if any, CSS3
+transform is affecting some dragged object. Rather you handle this manually be calling the `setZoom` method to tell Katavorio
+that there is a scale transform in effect.
+
+`setZoom` takes decimal values where 1.0 means 100%. 
+
+##### Ignoring Zoom
+It may be the case that you wish to configure some element to be draggable and have it not be subject to the current zoom
+transformation. To do this, you can set `ignoreZoom:true` on the `draggable` call:
+
+```
+var k = new Katavorio({ ...options... });
+...
+...
+k.draggable(someElement, {
+  filter:"button",
+  ignoreZoom:true
+});
+```
 
 #### Lifecycle Events
 
