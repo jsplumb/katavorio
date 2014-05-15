@@ -30,6 +30,28 @@
     
     "use strict";
 
+    var getOffsetRect = function (elem) {
+        // (1)
+        var box = elem.getBoundingClientRect();
+        
+        var body = document.body;
+        var docElem = document.documentElement;
+        
+        // (2)
+        var scrollTop = window.pageYOffset || docElem.scrollTop || body.scrollTop;
+        var scrollLeft = window.pageXOffset || docElem.scrollLeft || body.scrollLeft;
+        
+        // (3)
+        var clientTop = docElem.clientTop || body.clientTop || 0;
+        var clientLeft = docElem.clientLeft || body.clientLeft || 0;
+        
+        // (4)
+        var top  = box.top +  scrollTop - clientTop;
+        var left = box.left + scrollLeft - clientLeft;
+        
+        return { top: Math.round(top), left: Math.round(left) };
+    };
+
     var matchesSelector = function(el, selector, ctx) {
         ctx = ctx || el.parentNode;
         var possibles = ctx.querySelectorAll(selector);
@@ -177,6 +199,11 @@
                             dragEl = el.cloneNode(true);
                             dragEl.setAttribute("id", null);
                             dragEl.style.position = "absolute";
+                            // the clone node is added to the body; getOffsetRect gives us a value
+                            // relative to the body.
+                            var b = getOffsetRect(el);
+                            dragEl.style.left = b.left + "px";
+                            dragEl.style.top = b.top + "px";
                             document.body.appendChild(dragEl);
                         }
                         consumeStartEvent && _consume(e);
@@ -202,7 +229,7 @@
                     
                     intersectingDroppables.length = 0;
                     var pos = _pl(e), dx = pos[0] - downAt[0], dy = pos[1] - downAt[1],
-                    z = k.getZoom();
+                    z = params.ignoreZoom ? 1 : k.getZoom();
                     dx /= z;
                     dy /= z;
                     this.moveBy(dx, dy, e);
@@ -234,13 +261,13 @@
         };
 
         this.mark = function() {
-            posAtDown = params.getPosition(el);
-            this.size = params.getSize(el);
+            posAtDown = params.getPosition(dragEl);
+            this.size = params.getSize(dragEl);
             matchingDroppables = k.getMatchingDroppables(this);
             _setDroppablesActive(matchingDroppables, true, false, this);
             params.addClass(dragEl, params.dragClass || css.drag);
             if (params.constrain || params.containment) {
-                var cs = params.getSize(this.el.parentNode);
+                var cs = params.getSize(this.dragEl.parentNode);
                 constrainRect = { w:cs[0], h:cs[1] };
             }
         };
