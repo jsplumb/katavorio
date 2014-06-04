@@ -190,7 +190,9 @@
             constrainRect,
             matchingDroppables = [], intersectingDroppables = [],
             downListener = function(e) {
-                if (this.isEnabled() && canDrag()) {
+                // e.which for WebKit, Gecko and Opera. e.button for IE and Opera.
+                var isNotRightClick = e.which !== 3 && e.button !== 2;
+                if (isNotRightClick && this.isEnabled() && canDrag()) {
                     var _f =  filter(e) && _inputFilter(e, el, this.k);
                     if (_f) {
                         if (!clone)
