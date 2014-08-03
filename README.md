@@ -12,7 +12,7 @@ All is not lost, though, as this project also contains `DefaultKatavorioHelper` 
 
 First you need to instantiate an instance of Katavorio:
 
-```
+```javascript
 var k = new Katavorio({  options });
 ```
 
@@ -35,7 +35,7 @@ lifecycle:
 
 You can override any or all of these events by providing a JS object with the key `css` to the Katavorio constructor:
 
-```
+```javascript
 var k = new Katavorio({
     ...,
     css:{
@@ -50,7 +50,7 @@ var k = new Katavorio({
 
 You can also override the class that is set on an element currently being dragged when you make the call to `draggable`:
 
-```
+```javascript
 var k = new Katavorio( ...options... );
 k.draggable(someElement, {
     dragClass:"CustomDragClass"
@@ -61,7 +61,7 @@ k.draggable(someElement, {
 
 Similiarly, you can override the hover/active classes that are set on a droppable element:
 
-```
+```javascript
 var k = new Katavorio( ...options... );
 k.droppable(someElement, {
     activeClass:"CustomActiveClass",
@@ -78,7 +78,7 @@ Katavorio supports multiple scopes for each Drag and Drop.  By default, a Katavo
 on each Drag and Drop.  The default value for this is **katavorio-drag-scope**. You can override it on a per-instance level by
 providing a scope in the constructor params:
 
-```
+```javascript
 var k = new Katavorio({
   ...
   scope:"MyScope",
@@ -91,7 +91,7 @@ var k = new Katavorio({
 
 To constrain the movement of some draggable element to its parent, set `constrain:true` in the `draggable` call:
 
-```
+```javascript
 var k = new Katavorio({...options...});
 k.draggable(someElement, {
     constrain:true
@@ -102,7 +102,7 @@ k.draggable(someElement, {
 
 To constrain the allowed placements of a draggable to a grid, provide a `grid` in the `draggable` call:
 
-```
+```javascript
 var k = new Katavorio({...options...});
 k.draggable(someElement, {
    grid:[50, 50]
@@ -113,7 +113,7 @@ k.draggable(someElement, {
 
 If you want to drag a clone of your element, set `clone:true` on the `draggable` call:
 
-```
+```javascript
 var k = new Katavorio({...options...});
 k.draggable(someElement, {
    clone:true
@@ -124,7 +124,7 @@ k.draggable(someElement, {
 You can provide a `filter` parameter to the `draggable` method - a string selector defining an 
 element or set of elements from which dragging is not enabled:
 
-```
+```javascript
 var k = new Katavorio({ ...options... });
 k.draggable(someElement, {
   filter:"button"
@@ -136,11 +136,22 @@ mouse is on any child elements that are buttons.
 
 Valid values for the `filter` argument are any valid CSS selectors.
 
+#### Right mouse button
+By default, Katavorio does not respond to the right mouse button. You can override this behaviour by providing a `rightButtonCanDrag` parameter to the Katavorio constructor:
+
+```javascript
+var k = new Katavorio({
+  rightButtonCanDrag:true
+});
+```
+
+**Note** that due to the right mouse button generally being assigned to the context menu in browsers, you will need to attach some event handler that independently prevents the default behaviour of the right click event.
+
 #### Consuming filtered events
 If you set a filter, you can also tell Katavorio to consume any events that were filtered (otherwise 
 they bubble up through the DOM). 
 
-```
+```javascript
 var k = new Katavorio({ ...options... });
 k.draggable(someElement, {
   filter:"button",
@@ -162,7 +173,7 @@ that there is a scale transform in effect.
 It may be the case that you wish to configure some element to be draggable and have it not be subject to the current zoom
 transformation. To do this, you can set `ignoreZoom:true` on the `draggable` call:
 
-```
+```javascript
 var k = new Katavorio({ ...options... });
 ...
 ...
@@ -178,7 +189,7 @@ k.draggable(someElement, {
 
 Katavorio publishes events at three times during the drag lifecycle. You bind to them in the `draggable` call:
 
-```
+```javascript
 var k = new Katavorio({ options });
 k.draggable(someElement, {
   start:function(params) {
