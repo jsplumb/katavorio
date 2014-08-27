@@ -190,8 +190,7 @@
             constrainRect,
             matchingDroppables = [], intersectingDroppables = [],
             downListener = function(e) {
-                // e.which for WebKit, Gecko and Opera. e.button for IE and Opera.
-				var isNotRightClick = e.which !== 3 && e.button !== 2;
+                var isNotRightClick = params.rightButtonCanDrag || (e.which !== 3 && e.button !== 2);
                 if (isNotRightClick && this.isEnabled() && canDrag()) {
                     var _f =  filter(e) && _inputFilter(e, el, this.k);
                     if (_f) {
@@ -246,7 +245,8 @@
                 params.removeClass(document.body, css.noSelect);
                 this.unmark(e);
                 k.unmarkSelection(this, e);
-                params.events["stop"]({el:dragEl, pos:params.getPosition(dragEl), e:e, drag:this});
+                this.stop(e);
+                k.notifySelectionDragStop(this, e);
                 if (clone) {
                     dragEl && dragEl.parentNode && dragEl.parentNode.removeChild(dragEl);
                     dragEl = null;
@@ -260,6 +260,10 @@
         
         this.getDragElement = function() {
             return dragEl || el;
+        };
+
+        this.stop = function(e) {
+            params.events["stop"]({el:dragEl, pos:params.getPosition(dragEl), e:e, drag:this});
         };
 
         this.mark = function() {
@@ -532,6 +536,10 @@
 
         this.updateSelection = function(dx, dy, drag) {
             _foreach(_selection, function(e) { e.moveBy(dx, dy); }, drag);
+        };
+
+        this.notifySelectionDragStop = function(drag, evt) {
+            _foreach(_selection, function(e) { e.stop(evt); }, drag);   
         };
 
         this.setZoom = function(z) { _zoom = z; };
