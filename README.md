@@ -7,7 +7,22 @@ Currently, Katavorio does not work "out of the box" - it was developed as part o
 
 All is not lost, though, as this project also contains `DefaultKatavorioHelper` - the set of missing methods.
 
+- [Usage](#usage)
+- [CSS](#css)
+- [Drag and Drop Scope](#scope)
+- [Parent Constrain](#constrain)
+- [Grid Movement](#grid)
+- [Drag with a clone](#clone)
+- [Filtering by element](#filtering)
+- [Filter Exclude vs Include](#exlude)
+- [Drag Handles](#handle)
+- [Right mouse button](#right)
+- [Consuming filtered events](#consume)
+- [Zoom](#zoom)
 
+
+
+<a id="usage"></a>
 #### Usage
 
 First you need to instantiate an instance of Katavorio:
@@ -16,7 +31,7 @@ First you need to instantiate an instance of Katavorio:
 var k = new Katavorio({  options });
 ```
 
-
+<a id="css"></a>
 ##### CSS
 
 Katavorio attaches various CSS classes to elements, both at initialisation time, and on a few events during the drag/drop
@@ -72,6 +87,7 @@ k.droppable(someElement, {
 Note that in all cases, Katavorio supports multiple CSS classes, via a whitespace-separated string.
 
 
+<a id="scope"></a>
 #### Drag and Drop Scope
 
 Katavorio supports multiple scopes for each Drag and Drop.  By default, a Katavorio instance will set a single scope 
@@ -86,7 +102,7 @@ var k = new Katavorio({
 });
 ```
 
-
+<a id="constrain"></a>
 ##### Parent Constrain
 
 To constrain the movement of some draggable element to its parent, set `constrain:true` in the `draggable` call:
@@ -98,6 +114,7 @@ k.draggable(someElement, {
 });
 ```
 
+<a id="grid"></a>
 ##### Grid Movement
 
 To constrain the allowed placements of a draggable to a grid, provide a `grid` in the `draggable` call:
@@ -109,6 +126,7 @@ k.draggable(someElement, {
 });
 ```
 
+<a id="clone"></a>
 ##### Drag with a clone
 
 If you want to drag a clone of your element, set `clone:true` on the `draggable` call:
@@ -120,6 +138,7 @@ k.draggable(someElement, {
 });
 ```
 
+<a id="usage"></a>
 #### Filtering by element
 You can provide a `filter` parameter to the `draggable` method - a string selector defining an 
 element or set of elements from which dragging is not enabled:
@@ -136,6 +155,7 @@ mouse is on any child elements that are buttons.
 
 Valid values for the `filter` argument are any valid CSS selectors.
 
+<a id="exclude"></a>
 ##### Filter Exclude vs Include
 
 By default, Katavorio uses a supplied filter to _exclude_ elements from initiating a drag. However, there are limitations with CSS3 filters, for instance the `:not` selector only supports what are called "simple selectors",
@@ -162,6 +182,7 @@ k.draggable(someElement, {
 };
 ```
 
+<a id="handle"></a>
 #### Drag Handles
 
 Katavorio also lets you provide a `handle` parameter, which is treated as a `filter` with `filterExclude:false`. So, this
@@ -186,6 +207,7 @@ Katavorio also lets you provide a `handle` parameter, which is treated as a `fil
  ignored. Also, remember that providing `handle` means `filterExclude` is implicitly set to false.
 
 
+<a id="right"></a>
 #### Right mouse button
 By default, Katavorio does not respond to the right mouse button. You can override this behaviour by providing a `rightButtonCanDrag` parameter to the Katavorio constructor:
 
@@ -197,6 +219,7 @@ var k = new Katavorio({
 
 **Note** that due to the right mouse button generally being assigned to the context menu in browsers, you will need to attach some event handler that independently prevents the default behaviour of the right click event.
 
+<a id="consume"></a>
 #### Consuming filtered events
 If you set a filter, you can also tell Katavorio to consume any events that were filtered (otherwise 
 they bubble up through the DOM). 
@@ -212,6 +235,7 @@ k.draggable(someElement, {
 This causes Katavorio to call `preventDefault()` and `stopPropagation()` on events that were filtered (or to set the event's
 `returnValue` to false in IE < 9).
 
+<a id="zoom"></a>
 ### Zoom
 Katavorio takes zoom into account when dragging elements. This is not handled by attempting to infer what, if any, CSS3
 transform is affecting some dragged object. Rather you handle this manually be calling the `setZoom` method to tell Katavorio
