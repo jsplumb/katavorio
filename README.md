@@ -136,6 +136,56 @@ mouse is on any child elements that are buttons.
 
 Valid values for the `filter` argument are any valid CSS selectors.
 
+##### Filter Exclude vs Include
+
+By default, Katavorio uses a supplied filter to _exclude_ elements from initiating a drag. However, there are limitations with CSS3 filters, for instance the `:not` selector only supports what are called "simple selectors",
+meaning they contain single term, such as `:not(.someClass)` or `:not(button)`. `:not(.someClass > div)`, though,
+contains more than one term and isn't supported.
+
+To cater for limitations such as this, you can set `filterExclude:false` on your `draggable` call, and then the supplied
+`filter` is assumed to refer to elements that _should_ initiate a drag. An example:
+
+```
+k.draggable(someElement, {
+  filter:":not(.someClass > div)"
+};
+```
+
+The above will **not work**, per the explanation given in the preceding paragraph. The intention is to tell Katavorio that if
+the mouse is not down on an immediate child of an element having class _someClass_, then drag should not begin.
+Using `filterExclude:false` we can rewrite this as follows:
+
+```
+k.draggable(someElement, {
+  filter:".someClass > div",
+  filterExclude:false
+};
+```
+
+#### Drag Handles
+
+Katavorio also lets you provide a `handle` parameter, which is treated as a `filter` with `filterExclude:false`. So, this
+ example from above:
+
+ ```
+ k.draggable(someElement, {
+   filter:".someClass > div",
+   filterExclude:false
+ };
+ ```
+
+ can be achieved like this:
+
+ ```
+ k.draggable(someElement, {
+   handle:".someClass > div"
+ };
+ ```
+
+ **Note**: You **cannot** combine `filter` and `handle`. If `handle` is provided then it will be used and `filter` will be
+ ignored. Also, remember that providing `handle` means `filterExclude` is implicitly set to false.
+
+
 #### Right mouse button
 By default, Katavorio does not respond to the right mouse button. You can override this behaviour by providing a `rightButtonCanDrag` parameter to the Katavorio constructor:
 

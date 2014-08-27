@@ -3,7 +3,7 @@
     
     <head>
         <script src="src/default-katavorio-helper.js"></script>
-        <script src="src/katavorio-0.3.js"></script>
+        <script src="src/katavorio-0.4.js"></script>
         <style>            
         
             .katavorio-drag-no-select * {
@@ -22,6 +22,20 @@
                 text-align:center;
                 background-color:WhiteSmoke;
                 opacity:0.7;
+            }
+
+            .withhandle {
+                position:absolute;width:70px;height:50px;border:1px solid black;
+                font-size:12px;
+                border-radius:5px;
+                text-align:center;
+                background-color:WhiteSmoke;
+                opacity:0.7;
+            }
+
+            .handle {
+                background-color:darkcyan;
+                color:white;
             }
             
             #parentConstrain, #grid {
@@ -46,7 +60,12 @@
             #nine { left:920px; top:10px;}
             #ten { left:820px; top:200px;}
             #eleven { top:150px;left:150px; }
-            
+
+            #fourhundred {
+                left:600px;
+                top:150px;
+            }
+
             .filt {
                 width:10px; height:10px;
                 background-color:blue;
@@ -134,6 +153,10 @@
         <div class="w free" id="eight" scope="QUX" drop>QUX</div>
         <div class="w free" id="nine" scope="POO QUX" drag>POO QUX</div>
         <div class="w free" id="ten" scope="POO" drop constrain=".idontexist">POO</div>
+
+        <div class="w free withhandle" id="fourhundred" drag filter=".handle" filterExclude="false">
+            <div class="handle">handle</div>
+        </div>
         
         <div id="grid" class="c">
             <p>these elements are constrained and are on a 30x30 grid</p>
@@ -184,7 +207,8 @@
                 var w = document.querySelectorAll(".w");
                 for (var i = 0; i < w.length; i++) {
                     var scope = w[i].getAttribute("scope");
-                    if (w[i].getAttribute("drag") != null) {                        
+                    if (w[i].getAttribute("drag") != null) {
+                        var fe = w[i].getAttribute("filterExclude");
                         k.draggable(w[i], {
                             scope:scope, 
                             constrain:w[i].getAttribute("constrain") != null,
@@ -194,7 +218,8 @@
                                 console.dir(arguments);
                             },
                             filter:w[i].getAttribute("filter"),
-                            grid :w[i].getAttribute("grid") ? w[i].getAttribute("grid").split(/,/) : null
+                            grid :w[i].getAttribute("grid") ? w[i].getAttribute("grid").split(/,/) : null,
+                            filterExclude: fe == null ? null : fe !== "false"
                         });
                     }
                     if (w[i].getAttribute("drop") != null)
@@ -215,6 +240,12 @@
                             }
                         });
                 }
+
+                // elementd with handles
+                /*var wh = document.querySelectorAll(".withhandle");
+                for(var i = 0; i < wh.length; i++) {
+
+                }*/
                 
                 // setup zoom
                 var j = document.querySelectorAll("input[type='radio']");

@@ -319,5 +319,43 @@ var testSuite = function() {
 		k.deselectAll();
 		equal(k.getSelection().length, 0, "zero elements in selection");
 	});
+
+    // -- filters ---------------------------------
+
+    test("filter set via params", function() {
+        var d = _add("d1");
+        k.draggable(d, {
+            filter:".foo"
+        });
+
+        equal(".foo", d._katavorioDrag.getFilter(), "filter set and retrieved");
+        ok(d._katavorioDrag.isFilterExclude() == true, "filter exclude set to true");
+    });
+
+    test("filter set via setter", function() {
+        var d = _add("d1");
+        k.draggable(d);
+        d._katavorioDrag.setFilter(".foo");
+        equal(".foo", d._katavorioDrag.getFilter(), "filter set and retrieved");
+        ok(d._katavorioDrag.isFilterExclude() == true, "filter exclude set to true");
+    });
+
+    test("filter set via setter, set filterExclude to false", function() {
+        var d = _add("d1");
+        k.draggable(d);
+        d._katavorioDrag.setFilter(".foo", false);
+        equal(".foo", d._katavorioDrag.getFilter(), "filter set and retrieved");
+        ok(d._katavorioDrag.isFilterExclude() == false, "filter exclude set to false");
+    });
+
+    test("filter set via handle param", function() {
+        var d = _add("d1");
+        k.draggable(d, {
+            handle:".foo"
+        });
+
+        equal(".foo", d._katavorioDrag.getFilter(), "filter set from handle param");
+        ok(d._katavorioDrag.isFilterExclude() == false, "filter exclude set to false, from handle param existence");
+    });
 	
 };
