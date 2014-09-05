@@ -1,7 +1,7 @@
 /**
  drag/drop functionality for use with jsPlumb but with
  no knowledge of jsPlumb. supports multiple scopes (separated by whitespace), dragging
- multiple elements, constrain to parent, drop filters, drag start filters, custom
+ multiple elements, constrain to parent, constrain to grid, drop filters, drag start filters, custom
  css classes.
  
  a lot of the functionality of this script is expected to be plugged in:
@@ -120,7 +120,7 @@
             if (obj == null) return;
             obj = (typeof obj !== "string") && (obj.tagName == null && obj.length != null) ? obj : [ obj ];
             for (var i = 0; i < obj.length; i++)
-                fn.apply(obj[i]);
+                fn.apply(obj[i], [ obj[i] ]);
         },
         _consume = function(e) {
             if (e.stopPropagation) {
@@ -171,7 +171,6 @@
                     ];
             },
             constrain = (params.constrain || params.containment) ? function(pos) {
-                var r = { x:pos[0], y:pos[1], w:this.size[0], h:this.size[1] };
                 return [ 
                     Math.max(0, Math.min(constrainRect.w - this.size[0], pos[0])),
                     Math.max(0, Math.min(constrainRect.h - this.size[1], pos[1]))
@@ -185,8 +184,7 @@
                     filterSpec = f;
                     filterExclude = _exclude !== false;
                     filter = function(e) {
-                        var t = e.srcElement || e.target;
-                        var ms = matchesSelector(t, f, el);
+                        var t = e.srcElement || e.target, ms = matchesSelector(t, f, el);
                         return filterExclude ? !ms : ms;
                     };
                 }
@@ -214,7 +212,6 @@
                         }
                         consumeStartEvent && _consume(e);
                         downAt = _pl(e);
-                        params.events["start"]({el:el, pos:posAtDown, e:e, drag:this});
                         //
                         params.bind(document, "mousemove", moveListener);
                         params.bind(document, "mouseup", upListener);
@@ -231,6 +228,7 @@
                     if (!moving) {
                         this.mark();
                         moving = true;
+                        params.events["start"]({el:el, pos:posAtDown, e:e, drag:this});
                     }
                     
                     intersectingDroppables.length = 0;
@@ -466,6 +464,7 @@
                     _el._katavorioDrag = new Drag(_el, p, _css, _scope);
                     _reg(_el._katavorioDrag, _dragsByScope);
                     o.push(_el._katavorioDrag);
+                    katavorioParams.addClass(_el, _css.draggable);
                 }
             });
             return o;
@@ -480,6 +479,7 @@
                     _el._katavorioDrop = new Drop(_el, _prepareParams(params), _css, _scope);
                     _reg(_el._katavorioDrop, _dropsByScope);
                     o.push(_el._katavorioDrop);
+                    katavorioParams.addClass(_el, _css.droppable);
                 }
             });
             return o;
