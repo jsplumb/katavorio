@@ -65,6 +65,29 @@ var testSuite = function() {
 		equal(k.getDragsForScope("scope3").length, 0, "0 drags for scope3");
 		equal(k.getDragsForScope("scope4").length, 0, "0 drags for scope4");
 		equal(k.getDragsForScope("scope5").length, 1, "1 drag for scope5");
+
+        k.addDragScope(d1, "scope6");
+        equal(k.getDragsForScope("scope5").length, 1, "1 drag for scope5");
+        equal(k.getDragsForScope("scope6").length, 1, "1 drag for scope6");
+
+        // test multiples, and ensure scope8 is not added twice.
+        k.addDragScope(d1, "scope7 scope8 scope8");
+        equal(k.getDragsForScope("scope7").length, 1, "1 drag for scope7");
+        equal(k.getDragsForScope("scope8").length, 1, "1 drag for scope8");
+
+        k.removeDragScope(d1, "scope7");
+        equal(k.getDragsForScope("scope7").length, 0, "0 drags for scope7");
+
+        k.removeDragScope(d1, "scope6 scope8");
+        equal(k.getDragsForScope("scope6").length, 0, "0 drags for scope6");
+        equal(k.getDragsForScope("scope8").length, 0, "0 drags for scope8");
+
+        k.toggleDragScope(d1, "scope8");
+        equal(k.getDragsForScope("scope8").length, 1, "1 drag for scope8");
+
+        k.toggleDragScope(d1, "scope8 scope9");
+        equal(k.getDragsForScope("scope8").length, 0, "0 drags for scope8");
+        equal(k.getDragsForScope("scope9").length, 1, "1 drag for scope9");
     });
 	
 	test("change scope of droppable, via katavorio instance, on element", function() {
@@ -92,6 +115,29 @@ var testSuite = function() {
 		equal(k.getDropsForScope("scope3").length, 0, "0 drops for scope3");
 		equal(k.getDropsForScope("scope4").length, 0, "0 drops for scope4");
 		equal(k.getDropsForScope("scope5").length, 1, "1 drop for scope5");
+
+        k.addDropScope(d1, "scope6");
+        equal(k.getDropsForScope("scope5").length, 1, "1 Drop for scope5");
+        equal(k.getDropsForScope("scope6").length, 1, "1 Drop for scope6");
+
+        // test multiples, and ensure scope8 is not added twice.
+        k.addDropScope(d1, "scope7 scope8 scope8");
+        equal(k.getDropsForScope("scope7").length, 1, "1 Drop for scope7");
+        equal(k.getDropsForScope("scope8").length, 1, "1 Drop for scope8");
+
+        k.removeDropScope(d1, "scope7");
+        equal(k.getDropsForScope("scope7").length, 0, "0 Drops for scope7");
+
+        k.removeDropScope(d1, "scope6 scope8");
+        equal(k.getDropsForScope("scope6").length, 0, "0 Drops for scope6");
+        equal(k.getDropsForScope("scope8").length, 0, "0 Drops for scope8");
+
+        k.toggleDropScope(d1, "scope8");
+        equal(k.getDropsForScope("scope8").length, 1, "1 Drop for scope8");
+
+        k.toggleDropScope(d1, "scope8 scope9");
+        equal(k.getDropsForScope("scope8").length, 0, "0 Drops for scope8");
+        equal(k.getDropsForScope("scope9").length, 1, "1 Drop for scope9");
     });
 	
 // --------------------------- / SCOPE -----------------------------------------------
