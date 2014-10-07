@@ -315,6 +315,15 @@
         this.unmark = function(e) {
             _setDroppablesActive(matchingDroppables, false, true, this);
             matchingDroppables.length = 0;
+            // Sort intersecting droppables based on the distance to drop position.
+            // This way we ensure that the nearest droppable target is called first.
+            // In case of jsPlumb a new connection gets established to the nearest endpoint.
+            var dropPosition = this.params.getPosition(dragEl);
+            intersectingDroppables.sort(function (a, b) {
+            	var distA = Math.sqrt(Math.abs((dropPosition[0] - a.el.offsetLeft) * (dropPosition[1] - a.el.offsetTop))),
+            	    distB = Math.sqrt(Math.abs((dropPosition[0] - b.el.offsetLeft) * (dropPosition[1] - b.el.offsetTop)));
+            	return distA - distB;
+            });
             for (var i = 0; i < intersectingDroppables.length; i++)
                 intersectingDroppables[i].drop(this, e);
             this.params.removeClass(dragEl, this.params.dragClass || css.drag);
