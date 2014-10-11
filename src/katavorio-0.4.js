@@ -290,7 +290,7 @@
 
         this.abort = function() {
             if (downAt != null)
-                upListener();
+                this.upListener();
         };
 
         this.getDragElement = function() {
@@ -315,9 +315,9 @@
         this.unmark = function(e) {
             _setDroppablesActive(matchingDroppables, false, true, this);
             matchingDroppables.length = 0;
+            this.params.removeClass(dragEl, this.params.dragClass || css.drag);
             for (var i = 0; i < intersectingDroppables.length; i++)
                 intersectingDroppables[i].drop(this, e);
-            this.params.removeClass(dragEl, this.params.dragClass || css.drag);
         };
         this.moveBy = function(dx, dy, e) {
             intersectingDroppables.length = 0;
@@ -343,9 +343,9 @@
             this.downListener = null;
             this.upListener = null;
             this.moveListener = null;
-            this.params = null;
-            this.el = null;
-            dragEl = null;
+            //this.params = null;
+            //this.el = null;
+            //dragEl = null;
         };
 
         // init:register mousedown, and perhaps set a filter
@@ -435,13 +435,17 @@
                 }
             },
             _unreg = function(obj, map) {
+                var c = 0;
                 for(var i = 0; i < obj.scopes.length; i++) {
                     if (map[obj.scopes[i]]) {
                         var idx = katavorioParams.indexOf(map[obj.scopes[i]], obj);
-                        if (idx != -1)
+                        if (idx != -1) {
                             map[obj.scopes[i]].splice(idx, 1);
+                            c++;
+                        }
                     }
                 }
+                return c > 0 ;
             },
             _getMatchingDroppables = this.getMatchingDroppables = function(drag) {
                 var dd = [], _m = {};
@@ -633,8 +637,8 @@
         var _destroy = function(el, type, map) {
             el = _gel(el);
             if (el[type]) {
-                el[type].destroy();
-                _unreg(el[type], map);
+                if (_unreg(el[type], map))
+                    el[type].destroy();
                 el[type] = null;
             }
         };
