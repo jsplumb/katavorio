@@ -315,7 +315,6 @@
         this.unmark = function(e) {
             _setDroppablesActive(matchingDroppables, false, true, this);
             matchingDroppables.length = 0;
-            this.params.removeClass(dragEl, this.params.dragClass || css.drag);
             for (var i = 0; i < intersectingDroppables.length; i++)
                 intersectingDroppables[i].drop(this, e);
         };
