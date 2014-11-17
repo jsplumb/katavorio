@@ -146,6 +146,10 @@
                 FILTER FOO
                 <div class="filt"></div>
             </div>
+			<div class="w" id="twelve" scope="BAR" drag constrain>
+				FILTER BAR
+				<div class="filt"></div>
+			</div>
             
        </div>
     
@@ -222,6 +226,11 @@
                             filterExclude: fe == null ? null : fe !== "false"
                         });
                     }
+					if (w[i].getAttribute("id") === "twelve") {
+						w[i]._katavorioDrag.setFilter( function (event, element) {
+							return event.target.classList.contains("filt");
+						});
+					}
                     if (w[i].getAttribute("drop") != null)
                         k.droppable(w[i], {
                             scope:scope, 

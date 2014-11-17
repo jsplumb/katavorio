@@ -210,8 +210,11 @@
                     filterSpec = f;
                     filterExclude = _exclude !== false;
                     filter = function(e) {
-                        var t = e.srcElement || e.target, ms = matchesSelector(t, f, el);
-                        return filterExclude ? !ms : ms;
+                        var t = e.srcElement || e.target;
+						var m;
+						if (typeof filterSpec === "string") { m = matchesSelector(t, f, el); }
+						else if (typeof filterSpec === "function") { m = f(e, el); }
+                        return filterExclude ? !m : m;
                     };
                 }
             };
