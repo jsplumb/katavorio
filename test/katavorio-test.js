@@ -403,5 +403,33 @@ var testSuite = function() {
         equal(".foo", d._katavorioDrag.getFilter(), "filter set from handle param");
         ok(d._katavorioDrag.isFilterExclude() == false, "filter exclude set to false, from handle param existence");
     });
+		
+	test("filter function set via params", function () {
+	    var d = _add("d1");
+		function _foo (ev, el) { return ev.target.classList.contains("foo"); }
+        k.draggable(d, {
+            filter:_foo
+        });
+
+        equal(_foo, d._katavorioDrag.getFilter(), "filter set and retrieved");
+        ok(d._katavorioDrag.isFilterExclude() == true, "filter exclude set to true");
+	});
 	
+	    test("filter function set via setter", function() {
+        var d = _add("d1");
+		function _foo (ev, el) { return ev.target.classList.contains("foo"); }
+        k.draggable(d);
+        d._katavorioDrag.setFilter(_foo);
+        equal(_foo, d._katavorioDrag.getFilter(), "filter set and retrieved");
+        ok(d._katavorioDrag.isFilterExclude() == true, "filter exclude set to true");
+    });
+
+    test("filter function set via setter, set filterExclude to false", function() {
+        var d = _add("d1");
+		function _foo (ev, el) { return ev.target.classList.contains("foo"); }
+        k.draggable(d);
+        d._katavorioDrag.setFilter(_foo, false);
+        equal(_foo, d._katavorioDrag.getFilter(), "filter set and retrieved");
+        ok(d._katavorioDrag.isFilterExclude() == false, "filter exclude set to false");
+    });
 };
