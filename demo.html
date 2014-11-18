@@ -3,7 +3,7 @@
     
     <head>
         <script src="src/default-katavorio-helper.js"></script>
-        <script src="src/katavorio-0.4.js"></script>
+        <script src="src/katavorio-0.5.js"></script>
         <style>            
         
             .katavorio-drag-no-select * {
@@ -158,9 +158,9 @@
             <div class="handle">handle</div>
         </div>
         
-        <div id="grid" class="c">
+        <div id="grid" class="c" style="overflow:auto;">
             <p>these elements are constrained and are on a 30x30 grid</p>
-            <div class="w" id="twenty" scope="FOO BAR" drag constrain grid="30,30">FOO BAR</div>
+            <div class="w" id="twenty" scope="FOO BAR" drag grid="30,30" scroll>FOO BAR</div>
             <div class="w" id="twentyone" scope="BAR BAZ" drop grid="30,30">BAR BAZ</div>
             <div class="w" id="twentytwo" scope="BAZ" drop drag constrain grid="30,30">BAZ</div>
          </div>
@@ -219,6 +219,7 @@
                             },
                             filter:w[i].getAttribute("filter"),
                             grid :w[i].getAttribute("grid") ? w[i].getAttribute("grid").split(/,/) : null,
+                            scroll:true,//w[i].getAttribute("scroll"),
                             filterExclude: fe == null ? null : fe !== "false"
                         });
                     }

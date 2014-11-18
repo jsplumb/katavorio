@@ -186,7 +186,9 @@
         var downAt = [0,0], posAtDown = null, moving = false,
             consumeStartEvent = this.params.consumeStartEvent !== false,
             dragEl = this.el,
-            clone = this.params.clone;
+            clone = this.params.clone,
+            scroll = this.params.scroll;
+
         this.toGrid = function(pos) {
             return this.params.grid == null ? pos :
                 [
@@ -335,6 +337,12 @@
                 }
             }
             this.params.events["drag"]({el:this.el, pos:cPos, e:e, drag:this});
+
+            // test to see if the parent needs to be scrolled
+            if (scroll) {
+                var pnsl = dragEl.parentNode.scrollLeft, pnst = dragEl.parentNode.scrollTop;
+                console.log("scroll!", pnsl, pnst);
+            }
         };
         this.destroy = function() {
             this.params.unbind(this.el, "mousedown", this.downListener);
