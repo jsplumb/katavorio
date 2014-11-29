@@ -277,7 +277,6 @@
 
         this.upListener = function(e) {
             downAt = null;
-            moving = false;
             this.params.unbind(document, "mousemove", this.moveListener);
             this.params.unbind(document, "mouseup", this.upListener);
             this.params.removeClass(document.body, css.noSelect);
@@ -285,6 +284,7 @@
             k.unmarkSelection(this, e);
             this.stop(e);
             k.notifySelectionDragStop(this, e);
+            moving = false;
             if (clone) {
                 dragEl && dragEl.parentNode && dragEl.parentNode.removeChild(dragEl);
                 dragEl = null;
@@ -304,7 +304,8 @@
         };
 
         this.stop = function(e) {
-            this.params.events["stop"]({el:dragEl, pos:this.params.getPosition(dragEl), e:e, drag:this});
+            if (moving)
+                this.params.events["stop"]({el:dragEl, pos:this.params.getPosition(dragEl), e:e, drag:this});
         };
 
         this.mark = function() {
