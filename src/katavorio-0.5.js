@@ -327,8 +327,10 @@
         this.unmark = function(e) {
             _setDroppablesActive(matchingDroppables, false, true, this);
             matchingDroppables.length = 0;
-            for (var i = 0; i < intersectingDroppables.length; i++)
-                intersectingDroppables[i].drop(this, e);
+            for (var i = 0; i < intersectingDroppables.length; i++) {
+                var retVal = intersectingDroppables[i].drop(this, e);
+                if (retVal === true) break;
+            }
         };
         this.moveBy = function(dx, dy, e) {
             intersectingDroppables.length = 0;
@@ -410,12 +412,10 @@
                     this.params.events[val ? "over" : "out"]({el:this.el, e:e, drag:drag, drop:this});
                 hover = val;
             }
-            else
-                console.log("ignore")
         };
 
         this.drop = function(drag, event) {
-            this.params.events["drop"]({ drag:drag, e:event, drop:this });
+            return this.params.events["drop"]({ drag:drag, e:event, drop:this });
         };
 
         this.destroy = function() {
