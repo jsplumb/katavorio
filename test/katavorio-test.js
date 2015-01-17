@@ -1,9 +1,9 @@
 var divs  =[],
-	_add = function(id) {
+	_add = function(id, parent) {
 		var d = document.createElement("div");
 		d.setAttribute("id", id);
 		divs.push(d);
-		document.body.appendChild(d);
+        (parent || document.body).appendChild(d);
 		return d;
 	},
 	_clear = function() {
@@ -374,24 +374,24 @@ var testSuite = function() {
             filter:".foo"
         });
 
-        equal(".foo", d._katavorioDrag.getFilter(), "filter set and retrieved");
-        ok(d._katavorioDrag.isFilterExclude() == true, "filter exclude set to true");
+        ok(d._katavorioDrag.getFilters()[".foo"] != null, "filter set and retrieved");
+        ok(d._katavorioDrag.getFilters()[".foo"][1] == true, "filter exclude set to true");
     });
 
     test("filter set via setter", function() {
         var d = _add("d1");
         k.draggable(d);
         d._katavorioDrag.setFilter(".foo");
-        equal(".foo", d._katavorioDrag.getFilter(), "filter set and retrieved");
-        ok(d._katavorioDrag.isFilterExclude() == true, "filter exclude set to true");
+        ok(d._katavorioDrag.getFilters()[".foo"] != null, "filter set and retrieved");
+        ok(d._katavorioDrag.getFilters()[".foo"][1] == true, "filter exclude set to true");
     });
 
     test("filter set via setter, set filterExclude to false", function() {
         var d = _add("d1");
         k.draggable(d);
         d._katavorioDrag.setFilter(".foo", false);
-        equal(".foo", d._katavorioDrag.getFilter(), "filter set and retrieved");
-        ok(d._katavorioDrag.isFilterExclude() == false, "filter exclude set to false");
+        ok(".foo", d._katavorioDrag.getFilters()[".foo"] != null, "filter set and retrieved");
+        ok(d._katavorioDrag.getFilters()[".foo"][1] == false, "filter exclude set to false");
     });
 
     test("filter set via handle param", function() {
@@ -400,8 +400,8 @@ var testSuite = function() {
             handle:".foo"
         });
 
-        equal(".foo", d._katavorioDrag.getFilter(), "filter set from handle param");
-        ok(d._katavorioDrag.isFilterExclude() == false, "filter exclude set to false, from handle param existence");
+        ok(".foo", d._katavorioDrag.getFilters()[".foo"] != null, "filter set from handle param");
+        ok(d._katavorioDrag.getFilters()[".foo"][1] == false, "filter exclude set to false, from handle param existence");
     });
 		
 	test("filter function set via params", function () {
@@ -411,8 +411,9 @@ var testSuite = function() {
             filter:_foo
         });
 
-        equal(_foo, d._katavorioDrag.getFilter(), "filter set and retrieved");
-        ok(d._katavorioDrag.isFilterExclude() == true, "filter exclude set to true");
+        var filt = d._katavorioDrag.getFilters()[_foo._katavorioId];
+        ok( filt != null, "filter set and retrieved");
+        ok(filt[1] == true, "filter exclude set to true");
 	});
 	
 	    test("filter function set via setter", function() {
@@ -420,8 +421,9 @@ var testSuite = function() {
 		function _foo (ev, el) { return ev.target.classList.contains("foo"); }
         k.draggable(d);
         d._katavorioDrag.setFilter(_foo);
-        equal(_foo, d._katavorioDrag.getFilter(), "filter set and retrieved");
-        ok(d._katavorioDrag.isFilterExclude() == true, "filter exclude set to true");
+            var filt = d._katavorioDrag.getFilters()[_foo._katavorioId];
+        ok(filt != null, "filter set and retrieved");
+        ok(filt[1] == true, "filter exclude set to true");
     });
 
     test("filter function set via setter, set filterExclude to false", function() {
@@ -429,7 +431,169 @@ var testSuite = function() {
 		function _foo (ev, el) { return ev.target.classList.contains("foo"); }
         k.draggable(d);
         d._katavorioDrag.setFilter(_foo, false);
-        equal(_foo, d._katavorioDrag.getFilter(), "filter set and retrieved");
-        ok(d._katavorioDrag.isFilterExclude() == false, "filter exclude set to false");
+        var filt = d._katavorioDrag.getFilters()[_foo._katavorioId];
+        ok(filt != null, "filter set and retrieved");
+        ok(filt[1] == false, "filter exclude set to false");
+    });
+
+    // mouse triggers
+    test("filter mouse event, filter provided in draggable call.", function() {
+        var d = _add("d1"),
+            foo = _add("foo", d),
+            m = new Mottle(),
+            started = false;
+
+        k.draggable(d, {
+            filter:"#foo",
+            start:function() {
+                started = true;
+            }
+        });
+
+        m.trigger(foo, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == false, "drag not started");
+        started = false;
+        m.trigger(d, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == true, "drag started");
+    });
+
+    test("filter mouse event, filter exclude, filter provided in draggable call.", function() {
+        var d = _add("d1"),
+            foo = _add("foo", d),
+            m = new Mottle(),
+            started = false;
+
+        k.draggable(d, {
+            filter:"#foo",
+            filterExclude:false,
+            start:function() {
+                started = true;
+            }
+        });
+
+        m.trigger(foo, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == true, "drag started");
+        started = false;
+        m.trigger(d, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == false, "drag not started");
+    });
+
+    test("filter mouse event, filter set programmatically.", function() {
+        var d = _add("d1"),
+            foo = _add("foo", d),
+            m = new Mottle(),
+            started = false;
+
+        k.draggable(d, {
+            start:function() {
+                started = true;
+            }
+        });
+
+        d._katavorioDrag.setFilter("#foo");
+
+        m.trigger(foo, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == false, "drag not started");
+        started = false;
+        m.trigger(d, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == true, "drag started");
+    });
+
+    test("filter mouse event, filterExclude, filter set programmatically.", function() {
+        var d = _add("d1"),
+            foo = _add("foo", d),
+            m = new Mottle(),
+            started = false;
+
+        k.draggable(d, {
+            start:function() {
+                started = true;
+            }
+        });
+
+        d._katavorioDrag.setFilter("#foo", false);
+
+        m.trigger(foo, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == true, "drag started on element that is the filter");
+        started = false;
+        m.trigger(d, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == false, "drag not started on filtered elements");
+    });
+
+    test("filter mouse event, multiple filters set programmatically.", function() {
+        var d = _add("d1"),
+            foo = _add("foo", d),
+            bar = _add("bar", d),
+            m = new Mottle(),
+            started = false;
+
+        k.draggable(d, {
+            start:function() {
+                started = true;
+            }
+        });
+
+        d._katavorioDrag.setFilter("#foo");
+
+        // foo is filtered
+        m.trigger(foo, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == false, "drag not started");
+        m.trigger(document, "mouseup");
+
+        // main div not filtered
+        started = false;
+        m.trigger(d, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == true, "drag started");
+        m.trigger(document, "mouseup");
+
+        // bar not filtered
+        started = false;
+        m.trigger(bar, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == true, "drag started");
+        m.trigger(document, "mouseup");
+
+        //now add bar filter - using default exclusion mechanism - and try again
+        d._katavorioDrag.addFilter("#bar");
+        started = false;
+        m.trigger(bar, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == false, "drag not started");
+        m.trigger(document, "mouseup");
+
+        // now remove BAR filter, and try again.
+        d._katavorioDrag.removeFilter("#bar");
+        started = false;
+        m.trigger(bar, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == true, "drag started");
+        m.trigger(document, "mouseup");
+
+        //now add bar filter but this time say it should be included, not excluded.
+        d._katavorioDrag.addFilter("#bar", false);
+        started = false;
+        m.trigger(bar, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == true, "drag started");
+        m.trigger(document, "mouseup");
+
+        // clear all filters and ensure FOO is no longer filtered.
+        d._katavorioDrag.clearAllFilters();
+        started = false;
+        m.trigger(foo, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(started == true, "drag started");
+        m.trigger(document, "mouseup");
+
     });
 };
