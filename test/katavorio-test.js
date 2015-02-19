@@ -1,3 +1,6 @@
+
+QUnit.reorder = false;
+
 var divs  =[],
 	_add = function(id, parent) {
 		var d = document.createElement("div");
@@ -596,4 +599,25 @@ var testSuite = function() {
         m.trigger(document, "mouseup");
 
     });
+
+    test("drag class added then removed.", function() {
+        var d = _add("d1"),
+            foo = _add("foo", d),
+            bar = _add("bar", d),
+            m = new Mottle(),
+            started = false;
+
+        k.draggable(d, {
+            start: function () {
+                started = true;
+            }
+        });
+
+        m.trigger(foo, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(d.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
+    });
+
 };
