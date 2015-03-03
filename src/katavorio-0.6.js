@@ -23,7 +23,7 @@
 
  http://mrsharpoblunto.github.io/foswig.js/
 
- copyright 2014 jsPlumb
+ copyright 2015 jsPlumb
  */
 
 ;(function() {
