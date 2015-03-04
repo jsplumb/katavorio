@@ -335,7 +335,6 @@
                 this.params.unbind(document, "mousemove", this.moveListener);
                 this.params.unbind(document, "mouseup", this.upListener);
                 this.params.removeClass(document.body, css.noSelect);
-                this.params.removeClass(dragEl, this.params.dragClass || css.drag);
                 this.unmark(e);
                 k.unmarkSelection(this, e);
                 this.stop(e);
@@ -394,6 +393,7 @@
         };
         this.unmark = function(e) {
             _setDroppablesActive(matchingDroppables, false, true, this);
+            this.params.removeClass(dragEl, this.params.dragClass || css.drag);
             matchingDroppables.length = 0;
             for (var i = 0; i < intersectingDroppables.length; i++) {
                 var retVal = intersectingDroppables[i].drop(this, e);
