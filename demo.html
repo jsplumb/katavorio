@@ -3,7 +3,7 @@
     
     <head>
         <script src="src/default-katavorio-helper.js"></script>
-        <script src="src/katavorio-0.6.js"></script>
+        <script src="src/katavorio-0.7.js"></script>
         <style>            
         
             .katavorio-drag-no-select * {
@@ -116,6 +116,11 @@
                 border-radius:7px;
                 margin-bottom:10px;
             }
+
+            #selectParent {
+                width:90px;
+                height:90px;
+            }
         </style>
     </head>
     <body onload="init();">
@@ -150,6 +155,22 @@
 				FILTER BAR
 				<div class="filt"></div>
 			</div>
+
+            <div id="selectParent" class="w" drag constrain>
+                <select multiple>
+                    <option value="volvo">Volvo</option>
+                    <option value="saab">Saab</option>
+                    <option value="opel">Opel</option>
+                    <option value="audi">Audi</option>
+                </select>
+                <br/>
+                <select>
+                    <option value="volvo">Volvo</option>
+                    <option value="saab">Saab</option>
+                    <option value="opel">Opel</option>
+                    <option value="audi">Audi</option>
+                </select>
+            </div>
             
        </div>
     
