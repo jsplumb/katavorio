@@ -133,7 +133,7 @@
                 e.returnValue = false;
             }
         },
-        _defaultInputFilterSelector = "input,textarea,select,button",
+        _defaultInputFilterSelector = "input,textarea,select,button,option",
     //
     // filters out events on all input elements, like textarea, checkbox, input, select.
         _inputFilter = function(e, el, _katavorio) {
