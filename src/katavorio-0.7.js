@@ -95,7 +95,7 @@
         _classes = {
             draggable:"katavorio-draggable",    // draggable elements
             droppable:"katavorio-droppable",    // droppable elements
-            drag : "katavorio-drag",            // elements currently being dragged            
+            drag : "katavorio-drag",            // elements currently being dragged
             selected:"katavorio-drag-selected", // elements in current drag selection
             active : "katavorio-drag-active",   // droppables that are targets of a currently dragged element
             hover : "katavorio-drag-hover",     // droppables over which a matching drag element is hovering
@@ -721,7 +721,7 @@
 
         this.notifySelectionDragStart = function(drag, evt) {
             _foreach(_selection, function(e) { e.notifyStart(evt);}, drag);
-        }
+        };
 
         this.setZoom = function(z) { _zoom = z; };
         this.getZoom = function() { return _zoom; };
@@ -777,6 +777,13 @@
 
         this.destroyDroppable = function(el) {
             _destroy(el, "_katavorioDrop", this._dropsByScope);
+        };
+
+        this.reset = function() {
+            this._dragsByScope = {};
+            this._dropsByScope = {};
+            _selection = [];
+            _selectionMap = {};
         };
     };
 }).call(this);
