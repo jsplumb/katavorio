@@ -23,7 +23,7 @@
 
  http://mrsharpoblunto.github.io/foswig.js/
 
- copyright 2014 jsPlumb
+ copyright 2015 jsPlumb
  */
 
 ;(function() {
@@ -72,6 +72,8 @@
             }
             return rv;
         })(),
+        DEFAULT_GRID_X = 50,
+        DEFAULT_GRID_Y = 50,
         isIELT9 = iev > -1 && iev < 9,
         _pl = function(e) {
             if (isIELT9) {
@@ -93,7 +95,7 @@
         _classes = {
             draggable:"katavorio-draggable",    // draggable elements
             droppable:"katavorio-droppable",    // droppable elements
-            drag : "katavorio-drag",            // elements currently being dragged            
+            drag : "katavorio-drag",            // elements currently being dragged
             selected:"katavorio-drag-selected", // elements in current drag selection
             active : "katavorio-drag-active",   // droppables that are targets of a currently dragged element
             hover : "katavorio-drag-hover",     // droppables over which a matching drag element is hovering
@@ -131,7 +133,7 @@
                 e.returnValue = false;
             }
         },
-        _defaultInputFilterSelector = "input,textarea,select,button",
+        _defaultInputFilterSelector = "input,textarea,select,button,option",
     //
     // filters out events on all input elements, like textarea, checkbox, input, select.
         _inputFilter = function(e, el, _katavorio) {
@@ -191,12 +193,38 @@
             scroll = this.params.scroll,
             _multipleDrop = params.multipleDrop !== false;
 
+        var snapThreshold = params.snapThreshold || 5,
+            _snap = function(pos, x, y, thresholdX, thresholdY) {
+                thresholdX = thresholdX || snapThreshold;
+                thresholdY = thresholdY || snapThreshold;
+                var _dx = Math.floor(pos[0] / x),
+                    _dxl = x * _dx,
+                    _dxt = _dxl + x,
+                    _x = Math.abs(pos[0] - _dxl) <= thresholdX ? _dxl : Math.abs(_dxt - pos[0]) <= thresholdX ? _dxt : pos[0];
+
+                var _dy = Math.floor(pos[1] / y),
+                    _dyl = y * _dy,
+                    _dyt = _dyl + y,
+                    _y = Math.abs(pos[1] - _dyl) <= thresholdY ? _dyl : Math.abs(_dyt - pos[1]) <= thresholdY ? _dyt : pos[1];
+
+                return [ _x, _y];
+            };
+
         this.toGrid = function(pos) {
-            return this.params.grid == null ? pos :
-                [
-                        this.params.grid[0] * Math.floor(pos[0] / this.params.grid[0]),
-                        this.params.grid[1] * Math.floor(pos[1] / this.params.grid[1])
-                ];
+            if (this.params.grid == null) {
+                return pos;
+            }
+            else {
+                return _snap(pos, this.params.grid[0], this.params.grid[1]);
+            }
+        };
+
+        this.snap = function(x, y) {
+            if (dragEl == null) return;
+            x = x || (this.params.grid ? this.params.grid[0] : DEFAULT_GRID_X);
+            y = y || (this.params.grid ? this.params.grid[1] : DEFAULT_GRID_Y);
+            var p = this.params.getPosition(dragEl);
+            this.params.setPosition(dragEl, _snap(p, x, y, x, y));
         };
 
         this.constrain = typeof this.params.constrain === "function" ? this.params.constrain  : (this.params.constrain || this.params.containment) ? function(pos) {
@@ -296,10 +324,10 @@
                 if (!moving) {
                     var _continue = this.params.events["start"]({el:this.el, pos:posAtDown, e:e, drag:this});
                     if (_continue !== false) {
-                        this.mark();
+                        if (!downAt) return;
+                        this.mark(true);
                         moving = true;
                     }
-
                 }
 
                 // it is possible that the start event caused the drag to be aborted. So we check
@@ -322,7 +350,6 @@
                 this.params.unbind(document, "mousemove", this.moveListener);
                 this.params.unbind(document, "mouseup", this.upListener);
                 this.params.removeClass(document.body, css.noSelect);
-                this.params.removeClass(dragEl, this.params.dragClass || css.drag);
                 this.unmark(e);
                 k.unmarkSelection(this, e);
                 this.stop(e);
@@ -346,8 +373,12 @@
             return dragEl || this.el;
         };
 
-        this.stop = function(e) {
-            if (moving) {
+        this.notifyStart = function(e) {
+            this.params.events["start"]({el:this.el, pos:this.params.getPosition(dragEl), e:e, drag:this});
+        };
+
+        this.stop = function(e, force) {
+            if (force || moving) {
                 var positions = [],
                     sel = k.getSelection(),
                     dPos = this.params.getPosition(dragEl);
@@ -368,7 +399,7 @@
             }
         };
 
-        this.mark = function() {
+        this.mark = function(andNotify) {
             posAtDown = this.params.getPosition(dragEl);
             this.size = this.params.getSize(dragEl);
             matchingDroppables = k.getMatchingDroppables(this);
@@ -378,9 +409,13 @@
                 var cs = this.params.getSize(dragEl.parentNode);
                 constrainRect = { w:cs[0], h:cs[1] };
             }
+            if (andNotify) {
+                k.notifySelectionDragStart(this);
+            }
         };
         this.unmark = function(e) {
             _setDroppablesActive(matchingDroppables, false, true, this);
+            this.params.removeClass(dragEl, this.params.dragClass || css.drag);
             matchingDroppables.length = 0;
             for (var i = 0; i < intersectingDroppables.length; i++) {
                 var retVal = intersectingDroppables[i].drop(this, e);
@@ -682,7 +717,11 @@
         };
 
         this.notifySelectionDragStop = function(drag, evt) {
-            _foreach(_selection, function(e) { e.stop(evt); }, drag);
+            _foreach(_selection, function(e) { e.stop(evt, true); }, drag);
+        };
+
+        this.notifySelectionDragStart = function(drag, evt) {
+            _foreach(_selection, function(e) { e.notifyStart(evt);}, drag);
         };
 
         this.setZoom = function(z) { _zoom = z; };
@@ -710,6 +749,12 @@
             }.bind(this);
         }.bind(this));
 
+        this.snapToGrid = function(x, y) {
+            for (var s in this._dragsByScope) {
+                _foreach(this._dragsByScope[s], function(d) { d.snap(x, y); });
+            }
+        };
+
         this.getDragsForScope = function(s) { return this._dragsByScope[s]; };
         this.getDropsForScope = function(s) { return this._dropsByScope[s]; };
 
@@ -733,6 +778,13 @@
 
         this.destroyDroppable = function(el) {
             _destroy(el, "_katavorioDrop", this._dropsByScope);
+        };
+
+        this.reset = function() {
+            this._dragsByScope = {};
+            this._dropsByScope = {};
+            _selection = [];
+            _selectionMap = {};
         };
     };
 }).call(this);

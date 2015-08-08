@@ -3,7 +3,7 @@
     
     <head>
         <script src="src/default-katavorio-helper.js"></script>
-        <script src="src/katavorio-0.5.js"></script>
+        <script src="src/katavorio-0.7.js"></script>
         <style>            
         
             .katavorio-drag-no-select * {
@@ -94,7 +94,7 @@
             
             .katavorio-drag {
                 background-color:#999;
-                color:white;
+                color:pink;
             }
             .katavorio-drag-active {
                 border:3px solid green;
@@ -115,6 +115,11 @@
                 font-family:Verdana;     
                 border-radius:7px;
                 margin-bottom:10px;
+            }
+
+            #selectParent {
+                width:90px;
+                height:90px;
             }
         </style>
     </head>
@@ -150,6 +155,22 @@
 				FILTER BAR
 				<div class="filt"></div>
 			</div>
+
+            <div id="selectParent" class="w" drag constrain>
+                <select multiple>
+                    <option value="volvo">Volvo</option>
+                    <option value="saab">Saab</option>
+                    <option value="opel">Opel</option>
+                    <option value="audi">Audi</option>
+                </select>
+                <br/>
+                <select>
+                    <option value="volvo">Volvo</option>
+                    <option value="saab">Saab</option>
+                    <option value="opel">Opel</option>
+                    <option value="audi">Audi</option>
+                </select>
+            </div>
             
        </div>
     
@@ -161,7 +182,9 @@
         <div class="w free withhandle" id="fourhundred" drag filter=".handle" filterExclude="false">
             <div class="handle">handle</div>
         </div>
-        
+
+        <button id="btnSnap" onclick="k.snapToGrid();">SNAP</button>
+        <button id="btnSnap100" onclick="k.snapToGrid(100,100);">SNAP 100x100</button>
         <div id="grid" class="c" style="overflow:auto;">
             <p>these elements are constrained and are on a 30x30 grid</p>
             <div class="w" id="twenty" scope="FOO BAR" drag grid="30,30" scroll>FOO BAR</div>
@@ -266,7 +289,7 @@
                         document.getElementById("parentConstrain").style["transform"] = "scale(" + z + ")";
                         document.getElementById("parentConstrain").style["-webkit-transform"] = "scale(" + z + ")";
                     });
-                }
+                };
                 for (var i = 0; i < j.length; i++) {
                     _f(j[i]);
                 }

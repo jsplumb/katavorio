@@ -620,4 +620,60 @@ var testSuite = function() {
         ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
     });
 
+    test("stop event fired", function() {
+        var d = _add("d1"),
+            foo = _add("foo", d),
+            bar = _add("bar", d),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        k.draggable(d, {
+            start: function () {
+                started = true;
+            },
+            stop:function() {
+                stopped = true;
+            }
+        });
+
+        m.trigger(foo, "mousedown");
+        m.trigger(document, "mousemove");
+        ok(d.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+    });
+
+    test("start and stop event fired for multiple element drag", function() {
+        var d = _add("d1"), d2 = _add("d2"),
+            foo = _add("foo", d),
+            bar = _add("bar", d),
+            m = new Mottle(),
+            started = 0,
+            stopped = 0,
+            listeners = {
+                start: function () {
+                    started++;
+                },
+                stop:function() {
+                    stopped++;
+                }
+            };
+
+        k.draggable(d, listeners);
+        k.draggable(d2, listeners);
+
+        k.select(d2);
+
+        m.trigger(foo, "mousedown");
+        m.trigger(document, "mousemove");
+        m.trigger(document, "mousemove");
+        m.trigger(document, "mousemove");
+        m.trigger(document, "mouseup");
+
+        equal(started, 2, "start event was fired twice, once for each element");
+        equal(stopped, 2, "stop event was fired twice, once for each element");
+    });
+
 };
