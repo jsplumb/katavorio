@@ -1,5 +1,5 @@
 {
-    "name": "Katavorio",
+    "name": "katavorio",
     "version": "0.8.0",
     "description": "Lightweight drag/drop handler",
     "main": "src/katavorio-0.8.js",
