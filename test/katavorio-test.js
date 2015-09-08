@@ -419,7 +419,7 @@ var testSuite = function() {
         ok(filt[1] == true, "filter exclude set to true");
 	});
 	
-	    test("filter function set via setter", function() {
+	test("filter function set via setter", function() {
         var d = _add("d1");
 		function _foo (ev, el) { return ev.target.classList.contains("foo"); }
         k.draggable(d);
@@ -730,6 +730,42 @@ var testSuite = function() {
         ok(dragged2, "2nd drag event was fired");
 
         ok(d._katavorioDrag.visited, "still using the original drag object");
+    });
+
+    test("elements dragged to correct location", function() {
+        var d = _add("d1"),
+            foo = _add("foo", d),
+            bar = _add("bar", d),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        k.draggable(d, {
+            start: function () {
+                started = true;
+            },
+            stop:function() {
+                stopped = true;
+            }
+        });
+
+        d.style.position = "absolute";
+        d.style.left = "50px";
+        d.style.top = "50px";
+
+        var _t = function(el, evt, x, y) {
+            m.trigger(el, evt, { pageX:x, pageY:y, screenX:x, screenY:y, clientX:x, clientY:y});
+        };
+
+        _t(d, "mousedown", 0, 0);
+        _t(document, "mousemove", 100, 100);
+        ok(d.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(d.style.left, 10), 150, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 150, "top position correct after drag");
     });
 
 };

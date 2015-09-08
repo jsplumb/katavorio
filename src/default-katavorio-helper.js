@@ -83,7 +83,7 @@
                 obj["e" + type + fn] = fn;
                 obj[type + fn] = function () {
                     obj["e" + type + fn](window.event);
-                }
+                };
                 obj.attachEvent("on" + type, obj[type + fn]);
             }
         };
