@@ -36,7 +36,8 @@ var testSuite = function() {
                     console.log(arguments); 
                 },
                 intersects:seh.intersects,
-				indexOf:seh.indexOf
+				indexOf:seh.indexOf,
+                getId:seh.getId
            });
 		}
 	});
@@ -766,6 +767,104 @@ var testSuite = function() {
 
         equal(parseInt(d.style.left, 10), 150, "left position correct after drag");
         equal(parseInt(d.style.top, 10), 150, "top position correct after drag");
+    });
+
+// ---------------------------------------- POSSE TESTS --------------------------------------------------------
+
+    test("add item to initially non existent posse, by element", function() {
+        var d1 = _add("d1");
+        k.draggable(d1);
+        var posse = k.addToPosse(d1, "posse");
+        ok(posse != null);
+        equal(posse.name, "posse", "posse name is set");
+        equal(posse.members.length, 1, "posse has 1 member");
+        equal(posse.members[0], d1._katavorioDrag);
+        equal(d1._katavorioDrag.posse, posse, "posse is set on the Drag");
+
+        //equal(k.getPossesFor("d1")["posse"].name, "posse");
+    });
+
+    test("add item to initially non existent posse, by element", function() {
+        var d1 = _add("d1");var d2 = _add("d2");
+        k.draggable([d1, d2]);
+        var posse = k.addToPosse([d1, d2], "posse2");
+        ok(posse != null);
+        equal(posse.name, "posse2", "posse name is set");
+        equal(2, posse.members.length, "posse has 2 members");
+        equal(posse.members[0], d1._katavorioDrag);
+        equal(d1._katavorioDrag.posse, posse, "posse is set on the Drag");
+        equal(d2._katavorioDrag.posse, posse, "posse is set on the Drag");
+    });
+
+    test("elements in posse dragged to correct location", function() {
+        var d = _add("d1"),
+            d2 = _add("d2"),
+            d3 = _add("d3"),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        k.draggable([d,d2,d3], {
+            start: function () {
+                started = true;
+            },
+            stop:function() {
+                stopped = true;
+            }
+        });
+
+        d.style.position = "absolute";
+        d.style.left = "50px";
+        d.style.top = "50px";
+
+        d2.style.position = "absolute";
+        d2.style.left = "450px";
+        d2.style.top = "450px";
+
+        d3.style.position = "absolute";
+        d3.style.left = "850px";
+        d3.style.top = "850px";
+
+        k.addToPosse([d,d2,d3], "posse");
+
+        var _t = function(el, evt, x, y) {
+            m.trigger(el, evt, { pageX:x, pageY:y, screenX:x, screenY:y, clientX:x, clientY:y});
+        };
+
+        _t(d, "mousedown", 0, 0);
+        _t(document, "mousemove", 100, 100);
+        ok(d.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(d.style.left, 10), 150, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 150, "top position correct after drag");
+
+        equal(parseInt(d2.style.left, 10), 550, "left position correct after drag");
+        equal(parseInt(d2.style.top, 10), 550, "top position correct after drag");
+
+        equal(parseInt(d3.style.left, 10), 950, "left position correct after drag");
+        equal(parseInt(d3.style.top, 10), 950, "top position correct after drag");
+
+        // now remove d2 and d3 from the posse, move d, and check these did not move.
+        k.removeFromPosse([d2,d3]);
+
+        _t(d, "mousedown", 0, 0);
+        _t(document, "mousemove", -100, -100);
+        ok(d.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(d.style.left, 10), 50, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 50, "top position correct after drag");
+
+        equal(parseInt(d2.style.left, 10), 550, "left position correct after drag");
+        equal(parseInt(d2.style.top, 10), 550, "top position correct after drag");
+
+        equal(parseInt(d3.style.left, 10), 950, "left position correct after drag");
+        equal(parseInt(d3.style.top, 10), 950, "top position correct after drag");
     });
 
 };
