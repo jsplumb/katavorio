@@ -591,8 +591,7 @@
                     var _dd = this._dropsByScope[drag.scopes[i]];
                     if (_dd) {
                         for (var j = 0; j < _dd.length; j++) {
-                            //if (_dd[j].canDrop(drag) &&  !_m[_dd[j].el._katavorio] && _dd[j].el !== drag.el) {
-                            if (_dd[j].canDrop(drag) &&  !_m[_dd[j].uuid] && _dd[j].el !== drag.el) {
+                            if (_dd[j].canDrop(drag) &&  !_m[_dd[j].uuid]/* && _dd[j].el !== drag.el*/) {
                                 _m[_dd[j].uuid] = true;
                                 dd.push(_dd[j]);
                             }
@@ -842,15 +841,11 @@
             this._dropsByScope = {};
             _selection = [];
             _selectionMap = {};
+            _posses = {};
         };
 
         // ----- groups
         var _posses = {};
-        var _posseMap = {};
-        var _addToPosseMap = function(id, posse) {
-            _posseMap[id] = _posseMap[id] || {};
-            _posseMap[id][posse.name] = posse;
-        };
         /**
          * Add the given element to the posse with the given id, creating the group if it at first does not exist.
          * @param {Element} el Element to add.
