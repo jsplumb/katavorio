@@ -279,6 +279,13 @@ var testSuite = function() {
 		k.select("d1");
 		equal(k.getSelection().length, 1, "one element in selection");
 	});
+
+    test("simple drag selection, by element id as object String", function() {
+        var d1 = _add("d1");
+        k.draggable(d1);
+        k.select(new String("d1"));
+        equal(k.getSelection().length, 1, "one element in selection");
+    });
 	
 	test("simple drag selection, by element array", function() {
 		var d1 = _add("d1"), d2 = _add("d2");
