@@ -446,12 +446,14 @@
         this.moveBy = function(dx, dy, e) {
             intersectingDroppables.length = 0;
             var cPos = this.constrain(this.toGrid(([posAtDown[0] + dx, posAtDown[1] + dy])), dragEl),
-                rect = { x:cPos[0], y:cPos[1], w:this.size[0], h:this.size[1]};
+                rect = { x:cPos[0], y:cPos[1], w:this.size[0], h:this.size[1]},
+                focusDropElement = null;
+
             this.params.setPosition(dragEl, cPos);
             for (var i = 0; i < matchingDroppables.length; i++) {
                 var r2 = { x:matchingDroppables[i].position[0], y:matchingDroppables[i].position[1], w:matchingDroppables[i].size[0], h:matchingDroppables[i].size[1]};
-                //if (this.params.intersects(rect, r2) && matchingDroppables[i].canDrop(this) && (_multipleDrop || intersectingDroppables.length == 0)) {
-                if (this.params.intersects(rect, r2) && matchingDroppables[i].canDrop(this)) {
+                if (this.params.intersects(rect, r2) && (_multipleDrop || focusDropElement == null || focusDropElement == matchingDroppables[i].el) && matchingDroppables[i].canDrop(this)) {
+                    if (!focusDropElement) focusDropElement = matchingDroppables[i].el;
                     intersectingDroppables.push(matchingDroppables[i]);
                     matchingDroppables[i].setHover(this, true, e);
                 }
