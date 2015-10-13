@@ -786,7 +786,7 @@ var testSuite = function() {
         equal(posse.name, "posse", "posse name is set");
         equal(posse.members.length, 1, "posse has 1 member");
         equal(posse.members[0], d1._katavorioDrag);
-        equal(d1._katavorioDrag.posse, posse, "posse is set on the Drag");
+        ok(d1._katavorioDrag.posses.indexOf(posse.name) != -1, "posse is set on the Drag");
 
         //equal(k.getPossesFor("d1")["posse"].name, "posse");
     });
@@ -799,8 +799,8 @@ var testSuite = function() {
         equal(posse.name, "posse2", "posse name is set");
         equal(2, posse.members.length, "posse has 2 members");
         equal(posse.members[0], d1._katavorioDrag);
-        equal(d1._katavorioDrag.posse, posse, "posse is set on the Drag");
-        equal(d2._katavorioDrag.posse, posse, "posse is set on the Drag");
+        ok(d1._katavorioDrag.posses.indexOf(posse.name) != -1, "posse is set on the Drag");
+        ok(d2._katavorioDrag.posses.indexOf(posse.name) != -1, "posse is set on the Drag");
     });
 
     test("elements in posse dragged to correct location", function() {
@@ -855,7 +855,7 @@ var testSuite = function() {
         equal(parseInt(d3.style.top, 10), 950, "top position correct after drag");
 
         // now remove d2 and d3 from the posse, move d, and check these did not move.
-        k.removeFromPosse([d2,d3]);
+        k.removeFromPosse([d2,d3], "posse");
 
         _t(d, "mousedown", 0, 0);
         _t(document, "mousemove", -100, -100);

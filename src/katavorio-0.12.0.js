@@ -30,6 +30,17 @@
 
     "use strict";
 
+    Array.prototype.suggest = function(item, head) {
+        if (this.indexOf(item) === -1) {
+            head ? this.unshift(item) : this.push(item);
+        }
+    };
+
+    Array.prototype.vanquish = function(item) {
+        var idx = this.indexOf(item);
+        if (idx != -1) this.splice(idx, 1);
+    };
+
     var getOffsetRect = function (elem) {
         // (1)
         var box = elem.getBoundingClientRect(),
@@ -205,6 +216,9 @@
 
                 return [ _x, _y];
             };
+
+        this.posses = [];
+        var posseRoles = {};
 
         this.toGrid = function(pos) {
             if (this.params.grid == null) {
@@ -604,12 +618,12 @@
                 p = p || {};
                 var _p = {
                     events:{}
-                };
-                for (var i in katavorioParams) _p[i] = katavorioParams[i];
-                for (var i in p) _p[i] = p[i];
+                    }, i;
+                for (i in katavorioParams) _p[i] = katavorioParams[i];
+                for (i in p) _p[i] = p[i];
                 // events
 
-                for (var i = 0; i < _events.length; i++) {
+                for (i = 0; i < _events.length; i++) {
                     _p.events[_events[i]] = p[_events[i]] || _devNull;
                 }
                 _p.katavorio = this;
@@ -743,8 +757,10 @@
         };
 
         this.markPosses = function(drag) {
-            if (drag.posse) {
-                _foreach(drag.posse.members, function(d) { d.mark(); }, drag);
+            if (drag.posses) {
+                _each(drag.posses, function(p) {
+                    _foreach(_posses[p].members, function(d) { d.mark(); }, drag);
+                })
             }
         };
 
@@ -753,8 +769,12 @@
         };
 
         this.unmarkPosses = function(drag, event) {
-            if (drag.posse) {
-                _foreach(drag.posse.members, function(d) { d.unmark(event); }, drag);
+            if (drag.posses) {
+                _each(drag.posses, function(p) {
+                    _foreach(_posses[p].members, function (d) {
+                        d.unmark(event);
+                    }, drag);
+                });
             }
         };
 
@@ -765,10 +785,12 @@
         };
 
         this.updatePosses = function(dx, dy, drag) {
-            if (drag.posse) {
-                _foreach(drag.posse.members, function (e) {
-                    e.moveBy(dx, dy);
-                }, drag);
+            if (drag.posses) {
+                _each(drag.posses, function(p) {
+                    _foreach(_posses[p].members, function (e) {
+                        e.moveBy(dx, dy);
+                    }, drag);
+                });
             }
         };
 
@@ -860,8 +882,8 @@
             })();
             _each(el, function(_el) {
                 if (_el._katavorioDrag) {
-                    posse.members.push(_el._katavorioDrag);
-                    _el._katavorioDrag.posse = posse;
+                    posse.members.suggest(_el._katavorioDrag);
+                    _el._katavorioDrag.posses.suggest(posse.name);
                 }
             });
 
@@ -869,17 +891,19 @@
         };
 
         /**
-         * Remove the given element from its posse. Since elements can belong to only one posse at a time we do not need the posse id here.
+         * Remove the given element from the given posse(s).
          * @param {Element} el Element to remove.
-         * @returns {Posse}
+         * @param {String|String[]} posseId Either a single posse ID, or an array of them.
          */
-        this.removeFromPosse = function(el) {
+        this.removeFromPosse = function(el, posseId) {
+            if (posseId == null) throw new TypeError("No posse id provided for remove operation");
             _each(el, function(_el) {
-                if (_el._katavorioDrag && _el._katavorioDrag.posse) {
-                    var d = _el._katavorioDrag, p = d.posse;
-                    var idx = p.members.indexOf(d);
-                    if (idx != -1) p.members.splice(idx, 1);
-                    d.posse = null;
+                if (_el._katavorioDrag && _el._katavorioDrag.posses) {
+                    var d = _el._katavorioDrag;
+                    _each(posseId, function(p) {
+                        _posses[p].members.vanquish(d);
+                        d.posses.vanquish(_posses[p].name);
+                    });
                 }
             });
         };
