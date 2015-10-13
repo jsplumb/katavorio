@@ -874,4 +874,148 @@ var testSuite = function() {
         equal(parseInt(d3.style.top, 10), 950, "top position correct after drag");
     });
 
+    test("elements in posse dragged to correct location, multiple trigger elements.", function() {
+        var d = _add("d1"),
+            d2 = _add("d2"),
+            d3 = _add("d3"),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        k.draggable([d,d2,d3], {
+            start: function () {
+                started = true;
+            },
+            stop:function() {
+                stopped = true;
+            }
+        });
+
+        d.style.position = "absolute";
+        d.style.left = "50px";
+        d.style.top = "50px";
+
+        d2.style.position = "absolute";
+        d2.style.left = "450px";
+        d2.style.top = "450px";
+
+        d3.style.position = "absolute";
+        d3.style.left = "850px";
+        d3.style.top = "850px";
+
+        k.addToPosse([d,d2,d3], "posse");
+
+        var _t = function(el, evt, x, y) {
+            m.trigger(el, evt, { pageX:x, pageY:y, screenX:x, screenY:y, clientX:x, clientY:y});
+        };
+
+        _t(d, "mousedown", 0, 0);
+        _t(document, "mousemove", 100, 100);
+        ok(d.classList.contains("katavorio-drag"), "drag class set on other element in posse");
+        m.trigger(document, "mouseup");
+        ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on other element in posse");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(d.style.left, 10), 150, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 150, "top position correct after drag");
+
+        equal(parseInt(d2.style.left, 10), 550, "left position correct after drag");
+        equal(parseInt(d2.style.top, 10), 550, "top position correct after drag");
+
+        equal(parseInt(d3.style.left, 10), 950, "left position correct after drag");
+        equal(parseInt(d3.style.top, 10), 950, "top position correct after drag");
+
+
+        _t(d2, "mousedown", 0, 0);
+        _t(document, "mousemove", 100, 100);
+        ok(d.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(d.style.left, 10), 250, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 250, "top position correct after drag");
+
+        equal(parseInt(d2.style.left, 10), 650, "left position correct after drag");
+        equal(parseInt(d2.style.top, 10), 650, "top position correct after drag");
+
+        equal(parseInt(d3.style.left, 10), 1050, "left position correct after drag");
+        equal(parseInt(d3.style.top, 10), 1050, "top position correct after drag");
+
+    });
+
+    //
+    // same test as before but d2 is marked as 'passive' and should not cause the whole posse to drag.
+    // element 'd' still should though.
+    test("elements in posse dragged to correct location, single trigger element.", function() {
+        var d = _add("d1"),
+            d2 = _add("d2"),
+            d3 = _add("d3"),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        k.draggable([d,d2,d3], {
+            start: function () {
+                started = true;
+            },
+            stop:function() {
+                stopped = true;
+            }
+        });
+
+        d.style.position = "absolute";
+        d.style.left = "50px";
+        d.style.top = "50px";
+
+        d2.style.position = "absolute";
+        d2.style.left = "450px";
+        d2.style.top = "450px";
+
+        d3.style.position = "absolute";
+        d3.style.left = "850px";
+        d3.style.top = "850px";
+
+        k.addToPosse([d,d3], "posse");
+        k.addToPosse(d2, "posse", false);
+
+        var _t = function(el, evt, x, y) {
+            m.trigger(el, evt, { pageX:x, pageY:y, screenX:x, screenY:y, clientX:x, clientY:y});
+        };
+
+        _t(d, "mousedown", 0, 0);
+        _t(document, "mousemove", 100, 100);
+        ok(d.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(d.style.left, 10), 150, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 150, "top position correct after drag");
+
+        equal(parseInt(d2.style.left, 10), 550, "left position of d2 correct after drag");
+        equal(parseInt(d2.style.top, 10), 550, "top position of d2 correct after drag");
+
+        equal(parseInt(d3.style.left, 10), 950, "left position correct after drag");
+        equal(parseInt(d3.style.top, 10), 950, "top position correct after drag");
+
+
+        _t(d2, "mousedown", 0, 0);
+        _t(document, "mousemove", 100, 100);
+        ok(d2.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!d2.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(d.style.left, 10), 150, "left position correct after drag - d1 has not moved");
+        equal(parseInt(d.style.top, 10), 150, "top position correct after drag - d1 has not moved");
+
+        equal(parseInt(d2.style.left, 10), 650, "left position correct after drag - d2 has moved independently");
+        equal(parseInt(d2.style.top, 10), 650, "top position correct after drag - d2 has moved independently");
+
+        equal(parseInt(d3.style.left, 10), 950, "left position correct after drag - d3 has not moved");
+        equal(parseInt(d3.style.top, 10), 950, "top position correct after drag - d3 has not moved");
+
+    });
+
 };

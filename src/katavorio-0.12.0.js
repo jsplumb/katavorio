@@ -218,7 +218,7 @@
             };
 
         this.posses = [];
-        var posseRoles = {};
+        this.posseRoles = {};
 
         this.toGrid = function(pos) {
             if (this.params.grid == null) {
@@ -759,7 +759,11 @@
         this.markPosses = function(drag) {
             if (drag.posses) {
                 _each(drag.posses, function(p) {
-                    _foreach(_posses[p].members, function(d) { d.mark(); }, drag);
+                    if (drag.posseRoles[p]) {
+                        _foreach(_posses[p].members, function (d) {
+                            d.mark();
+                        }, drag);
+                    }
                 })
             }
         };
@@ -771,9 +775,11 @@
         this.unmarkPosses = function(drag, event) {
             if (drag.posses) {
                 _each(drag.posses, function(p) {
-                    _foreach(_posses[p].members, function (d) {
-                        d.unmark(event);
-                    }, drag);
+                    if (drag.posseRoles[p]) {
+                        _foreach(_posses[p].members, function (d) {
+                            d.unmark(event);
+                        }, drag);
+                    }
                 });
             }
         };
@@ -787,9 +793,11 @@
         this.updatePosses = function(dx, dy, drag) {
             if (drag.posses) {
                 _each(drag.posses, function(p) {
-                    _foreach(_posses[p].members, function (e) {
-                        e.moveBy(dx, dy);
-                    }, drag);
+                    if (drag.posseRoles[p]) {
+                        _foreach(_posses[p].members, function (e) {
+                            e.moveBy(dx, dy);
+                        }, drag);
+                    }
                 });
             }
         };
@@ -871,10 +879,11 @@
         /**
          * Add the given element to the posse with the given id, creating the group if it at first does not exist.
          * @param {Element} el Element to add.
-         * @param posseId ID of the group to add the element to.
-         * @returns {Posse}
+         * @param {String} posseId ID of the group to add the element to.
+         * @param {Boolean} [master=true] Indicates whether or not dragging this element should cause the whole posse to drag. Default is true.
+         * @returns {Posse} The Posse to which the element(s) was/were added.
          */
-        this.addToPosse = function(el, posseId) {
+        this.addToPosse = function(el, posseId, master) {
             var posse = _posses[posseId] || (function() {
                 var g = {name:posseId, members:[]};
                 _posses[posseId] = g;
@@ -884,6 +893,7 @@
                 if (_el._katavorioDrag) {
                     posse.members.suggest(_el._katavorioDrag);
                     _el._katavorioDrag.posses.suggest(posse.name);
+                    _el._katavorioDrag.posseRoles[posse.name] = !(master === false);
                 }
             });
 
@@ -902,7 +912,8 @@
                     var d = _el._katavorioDrag;
                     _each(posseId, function(p) {
                         _posses[p].members.vanquish(d);
-                        d.posses.vanquish(_posses[p].name);
+                        d.posses.vanquish(p);
+                        delete d.posseRoles[p];
                     });
                 }
             });
