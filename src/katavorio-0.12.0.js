@@ -618,7 +618,7 @@
                 p = p || {};
                 var _p = {
                     events:{}
-                    }, i;
+                }, i;
                 for (i in katavorioParams) _p[i] = katavorioParams[i];
                 for (i in p) _p[i] = p[i];
                 // events
@@ -759,7 +759,7 @@
         this.markPosses = function(drag) {
             if (drag.posses) {
                 _each(drag.posses, function(p) {
-                    if (drag.posseRoles[p]) {
+                    if (drag.posseRoles[p] && _posses[p]) {
                         _foreach(_posses[p].members, function (d) {
                             d.mark();
                         }, drag);
@@ -775,7 +775,7 @@
         this.unmarkPosses = function(drag, event) {
             if (drag.posses) {
                 _each(drag.posses, function(p) {
-                    if (drag.posseRoles[p]) {
+                    if (drag.posseRoles[p] && _posses[p]) {
                         _foreach(_posses[p].members, function (d) {
                             d.unmark(event);
                         }, drag);
@@ -793,7 +793,7 @@
         this.updatePosses = function(dx, dy, drag) {
             if (drag.posses) {
                 _each(drag.posses, function(p) {
-                    if (drag.posseRoles[p]) {
+                    if (drag.posseRoles[p] && _posses[p]) {
                         _foreach(_posses[p].members, function (e) {
                             e.moveBy(dx, dy);
                         }, drag);
