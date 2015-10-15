@@ -581,22 +581,27 @@
         this._dropsByScope = {};
         var _zoom = 1,
             _reg = function(obj, map) {
-                for(var i = 0; i < obj.scopes.length; i++) {
-                    map[obj.scopes[i]] = map[obj.scopes[i]] || [];
-                    map[obj.scopes[i]].push(obj);
-                }
+                _each(obj, function(_obj) {
+                    for(var i = 0; i < _obj.scopes.length; i++) {
+                        map[_obj.scopes[i]] = map[_obj.scopes[i]] || [];
+                        map[_obj.scopes[i]].push(_obj);
+                    }
+                });
             },
             _unreg = function(obj, map) {
                 var c = 0;
-                for(var i = 0; i < obj.scopes.length; i++) {
-                    if (map[obj.scopes[i]]) {
-                        var idx = katavorioParams.indexOf(map[obj.scopes[i]], obj);
-                        if (idx != -1) {
-                            map[obj.scopes[i]].splice(idx, 1);
-                            c++;
+                _each(obj, function(_obj) {
+                    for(var i = 0; i < _obj.scopes.length; i++) {
+                        if (map[_obj.scopes[i]]) {
+                            var idx = katavorioParams.indexOf(map[_obj.scopes[i]], _obj);
+                            if (idx != -1) {
+                                map[_obj.scopes[i]].splice(idx, 1);
+                                c++;
+                            }
                         }
                     }
-                }
+                });
+
                 return c > 0 ;
             },
             _getMatchingDroppables = this.getMatchingDroppables = function(drag) {
@@ -689,9 +694,11 @@
             _each(el, function(_el) {
                 _el = _gel(_el);
                 if (_el != null) {
-                    _el._katavorioDrop = new Drop(_el, _prepareParams(params), _css, _scope);
-                    _reg(_el._katavorioDrop, this._dropsByScope);
-                    o.push(_el._katavorioDrop);
+                    var drop = new Drop(_el, _prepareParams(params), _css, _scope);
+                    _el._katavorioDrop = _el._katavorioDrop || [];
+                    _el._katavorioDrop.push(drop);
+                    _reg(drop, this._dropsByScope);
+                    o.push(drop);
                     katavorioParams.addClass(_el, _css.droppable);
                 }
             }.bind(this));
@@ -815,11 +822,11 @@
 
         // does the work of changing scopes
         var _scopeManip = function(kObj, scopes, map, fn) {
-            if (kObj != null) {
-                _unreg(kObj, map);  // deregister existing scopes
-                kObj[fn](scopes); // set scopes
-                _reg(kObj, map); // register new ones
-            }
+            _each(kObj, function(_kObj) {
+                _unreg(_kObj, map);  // deregister existing scopes
+                _kObj[fn](scopes); // set scopes
+                _reg(_kObj, map); // register new ones
+            });
         };
 
         _each([ "set", "add", "remove", "toggle"], function(v) {
@@ -847,8 +854,10 @@
         var _destroy = function(el, type, map) {
             el = _gel(el);
             if (el[type]) {
-                if (_unreg(el[type], map))
-                    el[type].destroy();
+                if (_unreg(el[type], map)) {
+                    _each(el[type], function(kObj) { kObj.destroy() });
+                }
+
                 el[type] = null;
             }
         };
