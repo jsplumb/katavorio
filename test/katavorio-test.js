@@ -1016,6 +1016,25 @@ var testSuite = function() {
         equal(parseInt(d3.style.left, 10), 950, "left position correct after drag - d3 has not moved");
         equal(parseInt(d3.style.top, 10), 950, "top position correct after drag - d3 has not moved");
 
+
+        // remove d form all posses and move it, the others should not move
+        k.removeFromAllPosses(d);
+        _t(d, "mousedown", 0, 0);
+        _t(document, "mousemove", 100, 100);
+        ok(d.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(d.style.left, 10), 250, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 250, "top position correct after drag");
+
+        equal(parseInt(d2.style.left, 10), 650, "left position of d2 correct after drag");
+        equal(parseInt(d2.style.top, 10), 650, "top position of d2 correct after drag");
+
+        equal(parseInt(d3.style.left, 10), 950, "left position correct after drag");
+        equal(parseInt(d3.style.top, 10), 950, "top position correct after drag");
+
     });
 
 };
