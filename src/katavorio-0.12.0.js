@@ -918,5 +918,22 @@
                 }
             });
         };
+
+        /**
+         * Remove the given element from all Posses to which it belongs.
+         * @param {Element|Element[]} el Element to remove from Posses.
+         */
+        this.removeFromAllPosses = function(el) {
+            _each(el, function(_el) {
+                if (_el._katavorioDrag && _el._katavorioDrag.posses) {
+                    var d = _el._katavorioDrag;
+                    _each(d.posses, function(p) {
+                        _posses[p].members.vanquish(d);
+                    });
+                    d.posses.length = 0;
+                    d.posseRoles = {};
+                }
+            });
+        };
     };
 }).call(this);
