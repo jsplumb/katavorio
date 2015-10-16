@@ -976,8 +976,8 @@ var testSuite = function() {
         d3.style.left = "850px";
         d3.style.top = "850px";
 
-        k.addToPosse([d,d3], "posse");
-        k.addToPosse(d2, "posse", false);
+        k.addToPosse(d, "posse");
+        k.addToPosse([d2,d3], {id:"posse", active:false});
 
         var _t = function(el, evt, x, y) {
             m.trigger(el, evt, { pageX:x, pageY:y, screenX:x, screenY:y, clientX:x, clientY:y});
@@ -1034,6 +1034,71 @@ var testSuite = function() {
 
         equal(parseInt(d3.style.left, 10), 950, "left position correct after drag");
         equal(parseInt(d3.style.top, 10), 950, "top position correct after drag");
+
+    });
+
+
+    test("elements in posse dragged to correct location, multiple posses", function() {
+        var d = _add("d1"),
+            d2 = _add("d2"),
+            d3 = _add("d3"),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        k.draggable([d, d2, d3]);
+
+        d.style.position = "absolute";
+        d.style.left = "50px";
+        d.style.top = "50px";
+
+        d2.style.position = "absolute";
+        d2.style.left = "450px";
+        d2.style.top = "450px";
+
+        d3.style.position = "absolute";
+        d3.style.left = "850px";
+        d3.style.top = "850px";
+
+        // add d to posse and posse2.
+        k.addToPosse(d, "posse", "posse2");
+
+        // add d3 to posse only.
+        k.addToPosse(d3, "posse");
+
+        // add d2 to posse2 only, and as passive, so dragging it does not cause d to drag
+        k.addToPosse(d2, {id:"posse2",active:false});
+
+        var _t = function (el, evt, x, y) {
+            m.trigger(el, evt, { pageX: x, pageY: y, screenX: x, screenY: y, clientX: x, clientY: y});
+        };
+
+        _t(d, "mousedown", 0, 0);
+        _t(document, "mousemove", 100, 100);
+        m.trigger(document, "mouseup");
+
+        equal(parseInt(d.style.left, 10), 150, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 150, "top position correct after drag");
+
+        equal(parseInt(d2.style.left, 10), 550, "left position of d2 correct after drag");
+        equal(parseInt(d2.style.top, 10), 550, "top position of d2 correct after drag");
+
+        equal(parseInt(d3.style.left, 10), 950, "left position of d3 correct after drag");
+        equal(parseInt(d3.style.top, 10), 950, "top position of d3 correct after drag");
+
+        // move d2; d should not move, as d2 is passive. and d3 should certainly not move.
+        _t(d2, "mousedown", 0, 0);
+        _t(document, "mousemove", 100, 100);
+        m.trigger(document, "mouseup");
+
+        equal(parseInt(d.style.left, 10), 150, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 150, "top position correct after drag");
+
+        equal(parseInt(d2.style.left, 10), 650, "left position of d2 correct after drag");
+        equal(parseInt(d2.style.top, 10), 650, "top position of d2 correct after drag");
+
+        equal(parseInt(d3.style.left, 10), 950, "left position of d3 correct after drag");
+        equal(parseInt(d3.style.top, 10), 950, "top position of d3 correct after drag");
 
     });
 
