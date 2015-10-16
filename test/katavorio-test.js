@@ -1100,6 +1100,22 @@ var testSuite = function() {
         equal(parseInt(d3.style.left, 10), 950, "left position of d3 correct after drag");
         equal(parseInt(d3.style.top, 10), 950, "top position of d3 correct after drag");
 
+        // remove d from both posses, drag it, d2 and d3 should not move
+        k.removeFromPosse(d, "posse", "posse2");
+
+        _t(d, "mousedown", 0, 0);
+        _t(document, "mousemove", 100, 100);
+        m.trigger(document, "mouseup");
+
+        equal(parseInt(d.style.left, 10), 250, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 250, "top position correct after drag");
+
+        equal(parseInt(d2.style.left, 10), 650, "left position of d2 correct after drag");
+        equal(parseInt(d2.style.top, 10), 650, "top position of d2 correct after drag");
+
+        equal(parseInt(d3.style.left, 10), 950, "left position of d3 correct after drag");
+        equal(parseInt(d3.style.top, 10), 950, "top position of d3 correct after drag");
+
     });
 
 };

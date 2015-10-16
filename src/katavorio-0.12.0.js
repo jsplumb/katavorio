@@ -932,20 +932,23 @@
         /**
          * Remove the given element from the given posse(s).
          * @param {Element} el Element to remove.
-         * @param {String|String[]} posseId Either a single posse ID, or an array of them.
+         * @param {String...} posseId Varargs parameter: one value for each posse to remove the element from.
          */
         this.removeFromPosse = function(el, posseId) {
-            if (posseId == null) throw new TypeError("No posse id provided for remove operation");
-            _each(el, function(_el) {
-                if (_el._katavorioDrag && _el._katavorioDrag.posses) {
-                    var d = _el._katavorioDrag;
-                    _each(posseId, function(p) {
-                        _posses[p].members.vanquish(d);
-                        d.posses.vanquish(p);
-                        delete d.posseRoles[p];
-                    });
-                }
-            });
+            if (arguments.length < 2) throw new TypeError("No posse id provided for remove operation");
+            for(var i = 1; i < arguments.length; i++) {
+                posseId = arguments[i];
+                _each(el, function (_el) {
+                    if (_el._katavorioDrag && _el._katavorioDrag.posses) {
+                        var d = _el._katavorioDrag;
+                        _each(posseId, function (p) {
+                            _posses[p].members.vanquish(d);
+                            d.posses.vanquish(p);
+                            delete d.posseRoles[p];
+                        });
+                    }
+                });
+            }
         };
 
         /**
