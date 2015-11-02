@@ -855,10 +855,10 @@
                 _scopeManip(el._katavorioDrop, scopes, this._dropsByScope, v + "Scope");
             }.bind(this);
             this[v + "DragScope"] = function(el, scopes) {
-                _scopeManip(el._katavorioDrag, scopes, this._dragsByScope, v + "Scope");
+                _scopeManip(el.constructor === Drag ? el : el._katavorioDrag, scopes, this._dragsByScope, v + "Scope");
             }.bind(this);
             this[v + "DropScope"] = function(el, scopes) {
-                _scopeManip(el._katavorioDrop, scopes, this._dropsByScope, v + "Scope");
+                _scopeManip(el.constructor === Drop ? el : el._katavorioDrop, scopes, this._dropsByScope, v + "Scope");
             }.bind(this);
         }.bind(this));
 
@@ -935,7 +935,7 @@
          * the ID of a Posse to which the element should be added as an active participant, or an Object containing
          * `{ id:"posseId", active:false/true}`. In the latter case, if `active` is not provided it is assumed to be
          * true.
-         * @returns {Posse} The Posse to which the element(s) was/were added.
+         * @returns {Posse|Posse[]} The Posse(s) to which the element(s) was/were added.
          */
         this.addToPosse = function(el, spec) {
 
@@ -948,6 +948,18 @@
             return posses.length == 1 ? posses[0] : posses;
         };
 
+        /**
+         * Sets the posse(s) for the element with the given id, creating those that do not yet exist, and removing from
+         * the element any current Posses that are not specified by this method call. This method will not change the
+         * active/passive state if it is given a posse in which the element is already a member.
+         * @method setPosse
+         * @param {Element} el Element to set posse(s) on.
+         * @param {String...|Object...} spec Variable args parameters. Each argument can be a either a String, indicating
+         * the ID of a Posse to which the element should be added as an active participant, or an Object containing
+         * `{ id:"posseId", active:false/true}`. In the latter case, if `active` is not provided it is assumed to be
+         * true.
+         * @returns {Posse|Posse[]} The Posse(s) to which the element(s) now belongs.
+         */
         this.setPosse = function(el, spec) {
 
             var posses = [];
@@ -967,6 +979,7 @@
                 }
             }.bind(this));
 
+            return posses.length == 1 ? posses[0] : posses;
         };
 
         /**
