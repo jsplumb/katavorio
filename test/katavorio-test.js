@@ -983,6 +983,7 @@ var testSuite = function() {
             m.trigger(el, evt, { pageX:x, pageY:y, screenX:x, screenY:y, clientX:x, clientY:y});
         };
 
+        // move d. every node should move.
         _t(d, "mousedown", 0, 0);
         _t(document, "mousemove", 100, 100);
         ok(d.classList.contains("katavorio-drag"), "drag class set on element");
@@ -1000,6 +1001,7 @@ var testSuite = function() {
         equal(parseInt(d3.style.top, 10), 950, "top position correct after drag");
 
 
+        // move d2. only d2 should move.
         _t(d2, "mousedown", 0, 0);
         _t(document, "mousemove", 100, 100);
         ok(d2.classList.contains("katavorio-drag"), "drag class set on element");
@@ -1017,7 +1019,7 @@ var testSuite = function() {
         equal(parseInt(d3.style.top, 10), 950, "top position correct after drag - d3 has not moved");
 
 
-        // remove d form all posses and move it, the others should not move
+        // remove d from all posses and move it, the others should not move
         k.removeFromAllPosses(d);
         _t(d, "mousedown", 0, 0);
         _t(document, "mousemove", 100, 100);
@@ -1034,6 +1036,87 @@ var testSuite = function() {
 
         equal(parseInt(d3.style.left, 10), 950, "left position correct after drag");
         equal(parseInt(d3.style.top, 10), 950, "top position correct after drag");
+
+
+        // add d back to posse as active member
+        k.addToPosse(d, "posse");
+        // move d. every node should move.
+        _t(d, "mousedown", 0, 0);
+        _t(document, "mousemove", 100, 100);
+        ok(d.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(d.style.left, 10), 350, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 350, "top position correct after drag");
+
+        equal(parseInt(d2.style.left, 10), 750, "left position of d2 correct after drag");
+        equal(parseInt(d2.style.top, 10), 750, "top position of d2 correct after drag");
+
+        equal(parseInt(d3.style.left, 10), 1050, "left position correct after drag");
+        equal(parseInt(d3.style.top, 10), 1050, "top position correct after drag");
+
+
+        // now switch off d from being active member
+        k.setPosseState(d, "posse", false);
+        // move d. only d should move.
+        _t(d, "mousedown", 0, 0);
+        _t(document, "mousemove", 100, 100);
+        ok(d.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(d.style.left, 10), 450, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 450, "top position correct after drag");
+
+        equal(parseInt(d2.style.left, 10), 750, "left position of d2 correct after drag");
+        equal(parseInt(d2.style.top, 10), 750, "top position of d2 correct after drag");
+
+        equal(parseInt(d3.style.left, 10), 1050, "left position correct after drag");
+        equal(parseInt(d3.style.top, 10), 1050, "top position correct after drag");
+
+
+
+        // now switch d back on as active member
+        k.setPosseState(d, "posse", true);
+        // move d. every node should move.
+        _t(d, "mousedown", 0, 0);
+        _t(document, "mousemove", 100, 100);
+        ok(d.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(d.style.left, 10), 550, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 550, "top position correct after drag");
+
+        equal(parseInt(d2.style.left, 10), 850, "left position of d2 correct after drag");
+        equal(parseInt(d2.style.top, 10), 850, "top position of d2 correct after drag");
+
+        equal(parseInt(d3.style.left, 10), 1150, "left position correct after drag");
+        equal(parseInt(d3.style.top, 10), 1150, "top position correct after drag");
+
+
+        // finally, test the `setPosses` function. This takes the same args as addToPosse, but it will not take
+        // action if a given posse is already set on an element, and it will remove any posses from the element
+        // that were not passed in.
+
+        // so, first, set the posse state to false for "posse".
+        k.setPosseState(d, "posse", false);
+
+        // add a posse that we will take away shortly (to test it does actually get taken away)
+        k.addToPosse(d, "TEMPORARY");
+        equal(d._katavorioDrag.posseRoles["TEMPORARY"], true, "TEMPORARY posse added as active");
+
+        // then set posses:
+        k.setPosse(d, "posse", {id:"posse2", active:false}, {id:"posse3", active:true});
+
+        equal(d._katavorioDrag.posseRoles["posse"], false, "role in 'posse' unchanged");
+        equal(d._katavorioDrag.posseRoles["posse2"], false, "posse2 added as passive");
+        equal(d._katavorioDrag.posseRoles["posse3"], true, "posse3 added as active");
+        ok(d._katavorioDrag.posseRoles["TEMPORARY"] == null, "TEMPORARY posse removed by setPosse");
 
     });
 
