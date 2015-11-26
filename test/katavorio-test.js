@@ -2,9 +2,14 @@
 QUnit.reorder = false;
 
 var divs  =[],
-	_add = function(id, parent) {
+	_add = function(id, parent, xy) {
 		var d = document.createElement("div");
 		d.setAttribute("id", id);
+        d.style.position = "absolute";
+        if (xy) {
+            d.style.left = xy[0] + "px";
+            d.style.top = xy[1] + "px";
+        }
 		divs.push(d);
         (parent || document.body).appendChild(d);
 		return d;
@@ -377,6 +382,33 @@ var testSuite = function() {
 		equal(k.getSelection().length, 0, "zero elements in selection");
 	});
 
+    test("simple drag selection, by element array, move them around", function() {
+        var d1 = _add("d1", null, [0,0]), d2 = _add("d2", null, [200,200]);
+        equal(parseInt(d1.style.left, 10), 0, "d1 is at left 0");
+        equal(parseInt(d1.style.top, 10), 0, "d1 is at top 0");
+        equal(parseInt(d2.style.left, 10), 200, "d1 is at left 200");
+        equal(parseInt(d2.style.top, 10), 200, "d1 is at top 200");
+
+        k.draggable(d1, {
+            stop:function(params) {
+                equal(params.selection.length, 2, "two elements in selection on drag stop");
+            }
+        });
+        k.draggable(d2);
+        k.select([d1,d2]);
+        equal(k.getSelection().length, 2, "two elements in selection");
+
+
+        var m = new Mottle();
+        _t(m, d1, "mousedown", 0, 0);
+        _t(m, document, "mousemove", 100, 100);
+        equal(parseInt(d1.style.left, 10), 100, "d1 is at left 100");
+        equal(parseInt(d1.style.top, 10), 100, "d1 is at top 100");
+        equal(parseInt(d2.style.left, 10), 300, "d1 is at left 300");
+        equal(parseInt(d2.style.top, 10), 300, "d1 is at top 300");
+        m.trigger(document, "mouseup");
+    });
+
     // -- filters ---------------------------------
 
     test("filter set via params", function() {
@@ -740,6 +772,10 @@ var testSuite = function() {
         ok(d._katavorioDrag.visited, "still using the original drag object");
     });
 
+    var _t = function(m, el, evt, x, y) {
+        m.trigger(el, evt, { pageX:x, pageY:y, screenX:x, screenY:y, clientX:x, clientY:y});
+    };
+
     test("elements dragged to correct location", function() {
         var d = _add("d1"),
             foo = _add("foo", d),
@@ -761,12 +797,9 @@ var testSuite = function() {
         d.style.left = "50px";
         d.style.top = "50px";
 
-        var _t = function(el, evt, x, y) {
-            m.trigger(el, evt, { pageX:x, pageY:y, screenX:x, screenY:y, clientX:x, clientY:y});
-        };
 
-        _t(d, "mousedown", 0, 0);
-        _t(document, "mousemove", 100, 100);
+        _t(m, d, "mousedown", 0, 0);
+        _t(m, document, "mousemove", 100, 100);
         ok(d.classList.contains("katavorio-drag"), "drag class set on element");
         m.trigger(document, "mouseup");
         ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
@@ -809,14 +842,16 @@ var testSuite = function() {
             d3 = _add("d3"),
             m = new Mottle(),
             started = false,
-            stopped = false;
+            stopped = false,
+            stopEvents = {};
 
         k.draggable([d,d2,d3], {
             start: function () {
                 started = true;
             },
-            stop:function() {
+            stop:function(params) {
                 stopped = true;
+                stopEvents[params.el.id] = true;
             }
         });
 
@@ -854,6 +889,12 @@ var testSuite = function() {
         equal(parseInt(d3.style.left, 10), 950, "left position correct after drag");
         equal(parseInt(d3.style.top, 10), 950, "top position correct after drag");
 
+        ok(stopEvents.d1, "d1 fired stop event");
+        ok(stopEvents.d2, "d2 fired stop event");
+        ok(stopEvents.d3, "d3 fired stop event");
+
+        stopEvents = {};
+
         // now remove d2 and d3 from the posse, move d, and check these did not move.
         k.removeFromPosse([d2,d3], "posse");
 
@@ -872,6 +913,10 @@ var testSuite = function() {
 
         equal(parseInt(d3.style.left, 10), 950, "left position correct after drag");
         equal(parseInt(d3.style.top, 10), 950, "top position correct after drag");
+
+        ok(stopEvents.d1, "d1 fired stop event");
+        ok(!stopEvents.d2, "d2 did not fire stop event");
+        ok(!stopEvents.d3, "d3 did not fire stop event");
     });
 
     test("elements in posse dragged to correct location, multiple trigger elements.", function() {
