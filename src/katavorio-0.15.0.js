@@ -23,7 +23,7 @@
 
  http://mrsharpoblunto.github.io/foswig.js/
 
- copyright 2015 jsPlumb
+ copyright 2016 jsPlumb
  */
 
 ;(function() {
@@ -124,7 +124,7 @@
             active : "katavorio-drag-active",   // droppables that are targets of a currently dragged element
             hover : "katavorio-drag-hover",     // droppables over which a matching drag element is hovering
             noSelect : "katavorio-drag-no-select", // added to the body to provide a hook to suppress text selection
-            ghostProxy:"katavorio-ghost-proxy"
+            ghostProxy:"katavorio-ghost-proxy"  // added to a ghost proxy element in use when a drag has exited the bounds of its parent.
         },
         _defaultScope = "katavorio-drag-scope",
         _events = [ "stop", "start", "drag", "drop", "over", "out", "beforeStart" ],
