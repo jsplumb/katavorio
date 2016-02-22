@@ -66,6 +66,12 @@
 
             k.droppable(target, {
                 drop:function(p) {
+                    var dl = target.offsetLeft - source.offsetLeft,
+                        dt = target.offsetTop - source.offsetTop;
+
+                    p.drag.el.style.left = (p.drag.el.offsetLeft - dl) + "px";
+                    p.drag.el.top = (p.drag.el.offsetTop - dt) + "px";
+
                     target.appendChild(p.drag.el);
                 }
             });
