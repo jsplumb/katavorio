@@ -19,11 +19,13 @@
 
             .w {
                 width:60px;height:60px;background-color: sienna;position:absolute;cursor:move;
+                z-index:999;
             }
 
             .katavorio-ghost-proxy {
                 opacity:0.8;
                 outline:1px solid red;
+                z-index:1000;
             }
         </style>
     </head>
@@ -60,7 +62,13 @@
                 ghostProxy:function(el) {
                     return el.cloneNode(true);
                 }
-            })
+            });
+
+            k.droppable(target, {
+                drop:function(p) {
+                    target.appendChild(p.drag.el);
+                }
+            });
         </script>
     </body>
 </html>

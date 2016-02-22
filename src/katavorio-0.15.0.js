@@ -514,8 +514,10 @@
         };
         this.unmark = function(e, doNotCheckDroppables) {
             _setDroppablesActive(matchingDroppables, false, true, this);
+            var dragPos;
 
             if (isConstrained && useGhostProxy) {
+                dragPos = params.getPosition(dragEl);
                 this.el.parentNode.removeChild(dragEl);
                 dragEl = this.el;
             }
@@ -524,6 +526,9 @@
             matchingDroppables.length = 0;
             isConstrained = false;
             if (!doNotCheckDroppables) {
+                if (intersectingDroppables.length > 0 && dragPos) {
+                    params.setPosition(this.el, dragPos);
+                }
                 for (var i = 0; i < intersectingDroppables.length; i++) {
                     var retVal = intersectingDroppables[i].drop(this, e);
                     if (retVal === true) break;
