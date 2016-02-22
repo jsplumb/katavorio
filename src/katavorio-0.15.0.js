@@ -123,7 +123,8 @@
             selected:"katavorio-drag-selected", // elements in current drag selection
             active : "katavorio-drag-active",   // droppables that are targets of a currently dragged element
             hover : "katavorio-drag-hover",     // droppables over which a matching drag element is hovering
-            noSelect : "katavorio-drag-no-select" // added to the body to provide a hook to suppress text selection
+            noSelect : "katavorio-drag-no-select", // added to the body to provide a hook to suppress text selection
+            ghostProxy:"katavorio-ghost-proxy"
         },
         _defaultScope = "katavorio-drag-scope",
         _events = [ "stop", "start", "drag", "drop", "over", "out", "beforeStart" ],
@@ -215,7 +216,9 @@
             dragEl = this.el,
             clone = this.params.clone,
             scroll = this.params.scroll,
-            _multipleDrop = params.multipleDrop !== false;
+            _multipleDrop = params.multipleDrop !== false,
+            isConstrained = false,
+            useGhostProxy = params.ghostProxy != null && typeof params.ghostProxy === "function";
 
         var snapThreshold = params.snapThreshold || 5,
             _snap = function(pos, x, y, thresholdX, thresholdY) {
@@ -511,8 +514,15 @@
         };
         this.unmark = function(e, doNotCheckDroppables) {
             _setDroppablesActive(matchingDroppables, false, true, this);
+
+            if (isConstrained && useGhostProxy) {
+                this.el.parentNode.removeChild(dragEl);
+                dragEl = this.el;
+            }
+
             this.params.removeClass(dragEl, this.params.dragClass || css.drag);
             matchingDroppables.length = 0;
+            isConstrained = false;
             if (!doNotCheckDroppables) {
                 for (var i = 0; i < intersectingDroppables.length; i++) {
                     var retVal = intersectingDroppables[i].drop(this, e);
@@ -522,10 +532,38 @@
         };
         this.moveBy = function(dx, dy, e) {
             intersectingDroppables.length = 0;
-            var cPos = constrain(this.toGrid([posAtDown[0] + dx, posAtDown[1] + dy]), dragEl),
-                rect = { x:cPos[0], y:cPos[1], w:this.size[0], h:this.size[1]},
+            var desiredLoc = this.toGrid([posAtDown[0] + dx, posAtDown[1] + dy]),
+                cPos = constrain(desiredLoc, dragEl);
+
+            if (useGhostProxy) {
+                if (desiredLoc[0] != cPos[0] || desiredLoc[1] != cPos[1]) {
+                    if (!isConstrained) {
+                        console.log("flipping to ghost proxy now");
+                        var gp = params.ghostProxy(this.el);
+                        params.addClass(gp, _classes.ghostProxy);
+                        this.el.parentNode.appendChild(gp);
+                        dragEl = gp;
+                        isConstrained = true;
+                    } else {
+                        console.log("moving the ghost proxy around")
+                    }
+                    cPos = desiredLoc;
+                }
+                else {
+                    if (isConstrained) {
+                        console.log("back inside now; remove the ghost proxy and revert to the main el", this.el);
+                        this.el.parentNode.removeChild(dragEl);
+                        dragEl = this.el;
+                        isConstrained = false;
+                    }
+                }
+            }
+
+            var rect = { x:cPos[0], y:cPos[1], w:this.size[0], h:this.size[1]},
                 pageRect = { x:rect.x + pageDelta[0], y:rect.y + pageDelta[1], w:rect.w, h:rect.h},
                 focusDropElement = null;
+
+
 
             this.params.setPosition(dragEl, cPos);
             for (var i = 0; i < matchingDroppables.length; i++) {

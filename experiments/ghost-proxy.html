@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+    <head>
+
+        <style>
+            .c {
+                width:250px; height:250px; border:1px solid cadetblue; position:absolute;background-color: mintcream;
+            }
+
+            #source {
+                left:50px;
+                top:50px;
+            }
+
+            #target {
+                left:450px;
+                top:70px;
+            }
+
+            .w {
+                width:60px;height:60px;background-color: sienna;position:absolute;cursor:move;
+            }
+
+            .katavorio-ghost-proxy {
+                opacity:0.8;
+                outline:1px solid red;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div id="source" class="c">
+            <div class="w" style="left:20px;top:20px"></div>
+        </div>
+
+        <div id="target" class="c"></div>
+
+        <script src="../src/katavorio-0.15.0.js"></script>
+        <script src="../src/default-katavorio-helper.js"></script>
+
+        <script>
+            var seh = new DefaultKatavorioHelper();
+            var k = window.k = new Katavorio({
+                getPosition:seh.getPosition,
+                setPosition:seh.setPosition,
+                getSize:seh.getSize,
+                addClass:seh.addClass,
+                removeClass:seh.removeClass,
+                bind:seh.addEvent,
+                unbind:seh.removeEvent,
+                fireEvent:function() {
+                    console.log(arguments);
+                },
+                intersects:seh.intersects,
+                indexOf:seh.indexOf
+            });
+
+            k.draggable(source.querySelector(".w"), {
+                constrain:true,
+                ghostProxy:function(el) {
+                    return el.cloneNode(true);
+                }
+            })
+        </script>
+    </body>
+</html>
