@@ -258,14 +258,17 @@
         };
 
         var constrain;
+        var negativeFilter = function(pos) {
+            return (params.allowNegative === false) ? [ Math.max (0, pos[0]), Math.max(0, pos[1]) ] : pos;
+        };
 
         var _setConstrain = function(value) {
             constrain = typeof value === "function" ? value : value ? function(pos) {
-                return [
+                return negativeFilter([
                     Math.max(0, Math.min(constrainRect.w - this.size[0], pos[0])),
                     Math.max(0, Math.min(constrainRect.h - this.size[1], pos[1]))
-                ];
-            }.bind(this) : function(pos) { return pos; };
+                ]);
+            }.bind(this) : function(pos) { return negativeFilter(pos); };
         }.bind(this);
 
         _setConstrain(typeof this.params.constrain === "function" ? this.params.constrain  : (this.params.constrain || this.params.containment));

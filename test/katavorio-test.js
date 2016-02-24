@@ -809,6 +809,39 @@ var testSuite = function() {
         equal(parseInt(d.style.top, 10), 150, "top position correct after drag");
     });
 
+    test("elements cannot be dragged to negative values if allowNegative:false", function() {
+        var d = _add("d1"),
+            foo = _add("foo", d),
+            bar = _add("bar", d),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        k.draggable(d, {
+            start: function () {
+                started = true;
+            },
+            stop:function() {
+                stopped = true;
+            },
+            allowNegative:false
+        });
+
+        d.style.position = "absolute";
+        d.style.left = "50px";
+        d.style.top = "50px";
+
+        _t(m, d, "mousedown", 0, 0);
+        _t(m, document, "mousemove", -100, -100);
+        ok(d.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!d.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(d.style.left, 10), 0, "left position correct after drag");
+        equal(parseInt(d.style.top, 10), 0, "top position correct after drag");
+    });
+
 // ---------------------------------------- POSSE TESTS --------------------------------------------------------
 
     test("add item to initially non existent posse, by element", function() {
