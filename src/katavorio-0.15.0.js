@@ -207,6 +207,9 @@
         return params.katavorio;
     };
 
+    var TRUE = function() { return true; };
+    var FALSE = function() { return false; };
+
     var Drag = function(el, params, css, scope) {
         this._class = css.draggable;
         var k = Super.apply(this, arguments);
@@ -218,8 +221,8 @@
             scroll = this.params.scroll,
             _multipleDrop = params.multipleDrop !== false,
             isConstrained = false,
-            useGhostProxy = params.ghostProxy === true,
-            ghostProxy = useGhostProxy ? function(el) { return el.cloneNode(true); } : null;
+            useGhostProxy = params.ghostProxy === true ? TRUE : params.ghostProxy && typeof params.ghostProxy === "function" ? params.ghostProxy : FALSE,
+            ghostProxy = function(el) { return el.cloneNode(true); };
 
         var snapThreshold = params.snapThreshold || 5,
             _snap = function(pos, x, y, thresholdX, thresholdY) {
@@ -521,7 +524,7 @@
             _setDroppablesActive(matchingDroppables, false, true, this);
             var dragOffsets;
 
-            if (isConstrained && useGhostProxy) {
+            if (isConstrained && useGhostProxy()) {
                 dragOffsets = [dragEl.offsetLeft, dragEl.offsetTop];
                 this.el.parentNode.removeChild(dragEl);
                 dragEl = this.el;
@@ -545,7 +548,7 @@
             var desiredLoc = this.toGrid([posAtDown[0] + dx, posAtDown[1] + dy]),
                 cPos = constrain(desiredLoc, dragEl);
 
-            if (useGhostProxy) {
+            if (useGhostProxy()) {
                 if (desiredLoc[0] != cPos[0] || desiredLoc[1] != cPos[1]) {
                     if (!isConstrained) {
                         console.log("flipping to ghost proxy now");
