@@ -1198,6 +1198,10 @@ var testSuite = function() {
 
     });
 
+    var trigger = function (m, el, evt, x, y) {
+        m.trigger(el, evt, { pageX: x, pageY: y, screenX: x, screenY: y, clientX: x, clientY: y});
+    };
+
 
     test("elements in posse dragged to correct location, multiple posses", function() {
         var d = _add("d1"),
@@ -1279,4 +1283,38 @@ var testSuite = function() {
 
     });
 
+
+    test("ghost proxy tests", function() {
+        var d = _add("d1", null, [0,0]),
+            d2 = _add("d2", d, [10,10]),
+            d3 = _add("d3", null, [500,500]),
+            d4 = _add("d3", d3, [10,10]),
+            m = new Mottle();
+
+        d.style.width = "300px";
+        d3.style.width = "300px";
+        d.style.height= "300px";
+        d3.style.height = "300px";
+
+        k.draggable([d, d2, d3], {
+            ghostProxy:function(el) { return el.cloneNode(true); },
+            constrain:true
+        });
+
+        var dropped = false;
+        k.droppable([d,d3], {
+            drop:function() {
+                dropped = true;
+            }
+        });
+
+        trigger(m, d2, "mousedown", 0, 0);
+        trigger(m, document, "mousemove", 550, 550);
+        // should now be a ghost proxy in play
+        ok(document.querySelectorAll(".katavorio-ghost-proxy").length == 1, "there is a ghost proxy active");
+        trigger(m, document, "mouseup", 550, 550);
+        ok(dropped, "drop event occurred");
+        ok(document.querySelectorAll(".katavorio-ghost-proxy").length == 0, "there are no ghost proxies active");
+
+    });
 };
