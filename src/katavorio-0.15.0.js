@@ -218,7 +218,8 @@
             scroll = this.params.scroll,
             _multipleDrop = params.multipleDrop !== false,
             isConstrained = false,
-            useGhostProxy = params.ghostProxy != null && typeof params.ghostProxy === "function";
+            useGhostProxy = params.ghostProxy === true,
+            ghostProxy = useGhostProxy ? function(el) { return el.cloneNode(true); } : null;
 
         var snapThreshold = params.snapThreshold || 5,
             _snap = function(pos, x, y, thresholdX, thresholdY) {
@@ -272,6 +273,7 @@
         }.bind(this);
 
         _setConstrain(typeof this.params.constrain === "function" ? this.params.constrain  : (this.params.constrain || this.params.containment));
+
 
         /**
          * Sets whether or not the Drag is constrained. A value of 'true' means constrain to parent bounds; a function
@@ -517,10 +519,10 @@
         };
         this.unmark = function(e, doNotCheckDroppables) {
             _setDroppablesActive(matchingDroppables, false, true, this);
-            var dragPos;
+            var dragOffsets;
 
             if (isConstrained && useGhostProxy) {
-                dragPos = params.getPosition(dragEl);
+                dragOffsets = [dragEl.offsetLeft, dragEl.offsetTop];
                 this.el.parentNode.removeChild(dragEl);
                 dragEl = this.el;
             }
@@ -529,8 +531,8 @@
             matchingDroppables.length = 0;
             isConstrained = false;
             if (!doNotCheckDroppables) {
-                if (intersectingDroppables.length > 0 && dragPos) {
-                    params.setPosition(this.el, dragPos);
+                if (intersectingDroppables.length > 0 && dragOffsets) {
+                    params.setPosition(this.el, dragOffsets);
                 }
                 for (var i = 0; i < intersectingDroppables.length; i++) {
                     var retVal = intersectingDroppables[i].drop(this, e);
@@ -547,7 +549,7 @@
                 if (desiredLoc[0] != cPos[0] || desiredLoc[1] != cPos[1]) {
                     if (!isConstrained) {
                         console.log("flipping to ghost proxy now");
-                        var gp = params.ghostProxy(this.el);
+                        var gp = ghostProxy(this.el);
                         params.addClass(gp, _classes.ghostProxy);
                         this.el.parentNode.appendChild(gp);
                         dragEl = gp;

@@ -59,9 +59,7 @@
 
             k.draggable(source.querySelector(".w"), {
                 constrain:true,
-                ghostProxy:function(el) {
-                    return el.cloneNode(true);
-                }
+                ghostProxy:true
             });
 
             k.droppable(target, {

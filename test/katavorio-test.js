@@ -1297,7 +1297,7 @@ var testSuite = function() {
         d3.style.height = "300px";
 
         k.draggable([d, d2, d3], {
-            ghostProxy:function(el) { return el.cloneNode(true); },
+            ghostProxy:true,
             constrain:true
         });
 
