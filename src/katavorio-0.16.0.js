@@ -535,7 +535,7 @@
             _setDroppablesActive(matchingDroppables, false, true, this);
 
 
-            if (isConstrained && useGhostProxy()) {
+            if (isConstrained && useGhostProxy(dragEl)) {
                 ghostProxyOffsets = [dragEl.offsetLeft, dragEl.offsetTop];
                 this.el.parentNode.removeChild(dragEl);
                 dragEl = this.el;
@@ -562,7 +562,7 @@
             var desiredLoc = this.toGrid([posAtDown[0] + dx, posAtDown[1] + dy]),
                 cPos = constrain(desiredLoc, dragEl);
 
-            if (useGhostProxy()) {
+            if (useGhostProxy(dragEl)) {
                 if (desiredLoc[0] != cPos[0] || desiredLoc[1] != cPos[1]) {
                     if (!isConstrained) {
                         var gp = ghostProxy(this.el);
