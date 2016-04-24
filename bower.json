@@ -9,7 +9,7 @@
         "*LICENSE.txt"
     ],
     "main": [
-        "src/katavorio-0.15.0.js"
+        "src/katavorio-0.16.0.js"
     ],
     "authors": [
         "jsPlumb <hello@jsplumbtoolkit.com>"
