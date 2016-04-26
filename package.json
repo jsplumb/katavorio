@@ -1,8 +1,8 @@
 {
     "name": "katavorio",
-    "version": "0.16.0",
+    "version": "0.17.0",
     "description": "Lightweight drag/drop handler",
-    "main": "src/katavorio-0.16.0.js",
+    "main": "src/katavorio-0.17.0.js",
     "repository": {
         "type": "git",
         "url": "git://github.com/jsplumb/katavorio.git"
