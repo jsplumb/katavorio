@@ -390,6 +390,8 @@
         }.bind(this);
 
         this.moveListener = function(e) {
+            if (!this.isEnabled()) 
+                return;
             if (downAt) {
                 if (!moving) {
                     var _continue = _dispatch("start", {el:this.el, pos:posAtDown, e:e, drag:this});
