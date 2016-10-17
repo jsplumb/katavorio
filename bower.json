@@ -1,6 +1,6 @@
 {
     "name": "Katavorio",
-    "version": "0.17.0",
+    "version": "0.18.0",
     "ignore": [
         "html",
         "test",
@@ -9,7 +9,7 @@
         "*LICENSE.txt"
     ],
     "main": [
-        "src/katavorio-0.17.0.js"
+        "src/katavorio-0.18.0.js"
     ],
     "authors": [
         "jsPlumb <hello@jsplumbtoolkit.com>"

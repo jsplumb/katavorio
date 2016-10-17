@@ -1473,4 +1473,52 @@ var testSuite = function () {
         equal(finalPos[0], 10, "final pos left is correct; this is where the element will be.");
         equal(finalPos[1], 10, "final pos top is correct; this is where the element will be.");
     });
+
+    //
+    // this test was created in response to issue 568 of jsplumb, in which the user was unable to
+    // drag a connection to a node in a group; the connection was made to the group. it is due to the
+    // drop order, which it itself determined by the order in which objects are made droppable.
+    //
+    test("order of droppables", function() {
+        var parent = _add("d1", null, [50,50], [500,500]);
+        var child = _add("d2", parent, [150,150], [50,50]);
+        var drag = _add("d3", null, [0,0], [50,50]);
+        var m = new Mottle();
+        var dropTarget = null;
+
+        k.droppable(parent, {
+            drop:function() {
+                dropTarget = parent;
+                return true;
+            },
+            rank:1
+        });
+
+        k.droppable(child, {
+            drop:function() {
+                dropTarget = child;
+                return true;
+            },
+            rank:10
+        });
+
+
+
+        k.draggable(drag);
+
+        // drag and drop 'drag' on an area of the parent that the child is not located at
+        trigger(m, drag, "mousedown", 10, 10);
+        trigger(m, document, "mousemove", 300, 300);
+        trigger(m, document, "mouseup", 300, 300);
+
+        equal(dropTarget, parent, "drop target was parent");
+
+        // now drag and drop 'drag' on an area of the parent that the child IS located at
+        trigger(m, drag, "mousedown", 300, 300);
+        trigger(m, document, "mousemove", 200, 200);
+        trigger(m, document, "mouseup", 200, 200);
+
+        equal(dropTarget, child, "drop target was child");
+
+    });
 };
