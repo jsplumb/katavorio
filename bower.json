@@ -1,6 +1,6 @@
 {
     "name": "Katavorio",
-    "version": "0.18.0",
+    "version": "0.19.0",
     "ignore": [
         "html",
         "test",
@@ -9,11 +9,11 @@
         "*LICENSE.txt"
     ],
     "main": [
-        "src/katavorio-0.18.0.js"
+        "src/katavorio.js", "src/default-katavorio-helper.js"
     ],
     "authors": [
         "jsPlumb <hello@jsplumbtoolkit.com>"
     ],
     "description": "Lightweight drag/drop handler",
-    "license": "MIT/GPL2"
+    "license": "(MIT OR GPL-2.0)"
 }

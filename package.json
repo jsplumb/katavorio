@@ -1,12 +1,19 @@
 {
-    "name": "katavorio",
-    "version": "0.18.0",
-    "description": "Lightweight drag/drop handler",
-    "main": "src/katavorio-0.18.0.js",
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/jsplumb/katavorio.git"
-    },
-    "author": "jsPlumb <hello@jsplumbtoolkit.com>",
-    "license": "MIT/GPL2"
+  "name": "katavorio",
+  "version": "0.19.0",
+  "description": "Lightweight drag/drop handler",
+  "main": "src/katavorio.js",
+  "files": [
+    "src/katavorio.js",
+    "src/default-katavorio-helper.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jsplumb/katavorio.git"
+  },
+  "author": "jsPlumb <hello@jsplumbtoolkit.com>",
+  "license": "MIT/GPL2",
+  "devDependencies": {
+    "mottle": "^0.8.0"
+  }
 }
