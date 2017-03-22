@@ -433,6 +433,8 @@
                     dragEl = null;
                 }
 
+                intersectingDroppables.length = 0;
+
                 if (revertFunction && revertFunction(this.el, this.params.getPosition(this.el)) === true) {
                     this.params.setPosition(this.el, posAtDown);
                     _dispatch("revert", this.el);
@@ -1168,7 +1170,7 @@
 
     };
 
-    root.Katavorio.version = "0.19.1";
+    root.Katavorio.version = "0.19.2";
 
     if (typeof exports !== "undefined") {
         exports.Katavorio = root.Katavorio;
