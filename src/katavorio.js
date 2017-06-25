@@ -250,7 +250,8 @@
                 return pos;
             }
             else {
-                return _snap(pos, this.params.grid[0], this.params.grid[1]);
+                this.params.snapTolerance = this.params.snapTolerance || [this.params.grid[0] / 2, this.params.grid[1] / 2];
+                return _snap(pos, this.params.grid[0], this.params.grid[1], this.params.snapTolerance[0], this.params.snapTolerance[1]);
             }
         };
 
