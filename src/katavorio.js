@@ -1170,7 +1170,7 @@
 
     };
 
-    root.Katavorio.version = "0.19.2";
+    root.Katavorio.version = "0.19.3";
 
     if (typeof exports !== "undefined") {
         exports.Katavorio = root.Katavorio;
