@@ -1521,4 +1521,126 @@ var testSuite = function () {
         equal(dropTarget, child, "drop target was child");
 
     });
+
+    test("droppable, cursor over the target", function() {
+
+        // the drag element is at [0,0] and of size [50,50].
+
+        var parent = _add("d1", null, [50,50], [500,500]);
+        var drag = _add("d3", null, [0,0], [50,50]);
+        var m = new Mottle();
+        var dropTarget = null;
+
+        k.droppable(parent, {
+            drop:function() {
+                dropTarget = parent;
+                return true;
+            },
+            rank:1
+        });
+
+        k.draggable(drag);
+
+        // drag and drop 'drag' and put the mouse cursor plumb in the target
+        trigger(m, drag, "mousedown", 45, 45);
+        trigger(m, document, "mousemove", 300, 300);
+        trigger(m, document, "mouseup", 300, 300);
+
+        equal(dropTarget, parent, "drop target was parent");
+
+
+    });
+
+    test("droppable, cursor not over the target", function() {
+
+        // the drag element is at [0,0] and of size [50,50].
+
+        var parent = _add("d1", null, [50,50], [500,500]);
+        var drag = _add("d3", null, [0,0], [50,50]);
+        var m = new Mottle();
+        var dropTarget = null;
+
+        k.droppable(parent, {
+            drop:function() {
+                dropTarget = parent;
+                return true;
+            },
+            rank:1
+        });
+
+        k.draggable(drag);
+
+        // drop with cursor not over the target, but the drag element _is_ over the drop target.
+        trigger(m, drag, "mousedown", 40,40);
+        trigger(m, document, "mousemove", 580, 580);
+        trigger(m, document, "mouseup", 580, 580);
+
+        equal(drag.offsetLeft, 540, "offsetleft is 540")
+
+        equal(dropTarget, parent, "drop target was parent");
+
+
+    });
+
+    test("droppable, top left drag corner not over the target", function() {
+
+        // the drag element is at [0,0] and of size [50,50].
+
+        var parent = _add("d1", null, [50,50], [500,500]);
+        var drag = _add("d3", null, [0,0], [50,50]);
+        var m = new Mottle();
+        var dropTarget = null;
+
+        k.droppable(parent, {
+            drop:function() {
+                dropTarget = parent;
+                return true;
+            },
+            rank:1
+        });
+
+        k.draggable(drag);
+
+        // drop with cursor not over the target, but the drag element _is_ over the drop target.
+        trigger(m, drag, "mousedown", 10,10);
+        trigger(m, document, "mousemove", 20, 20);
+        trigger(m, document, "mouseup", 20, 20);
+
+        equal(drag.offsetLeft, 10, "offsetleft is 10");
+
+        equal(dropTarget, parent, "drop target was parent");
+
+
+    });
+
+    test("droppable, drag element not over the target at all", function() {
+
+        // the drag element is at [0,0] and of size [50,50].
+
+        var parent = _add("d1", null, [50,50], [500,500]);
+        var drag = _add("d3", null, [0,0], [50,50]);
+        var m = new Mottle();
+        var dropTarget = null;
+
+        k.droppable(parent, {
+            drop:function() {
+                dropTarget = parent;
+                return true;
+            },
+            rank:1
+        });
+
+        k.draggable(drag);
+
+        // drop with cursor not over the target, but the drag element _is_ over the drop target.
+        trigger(m, drag, "mousedown", 10,10);
+        trigger(m, document, "mousemove", 2000, 2000);
+        trigger(m, document, "mouseup", 2000, 2000);
+
+        equal(drag.offsetLeft, 1990, "offsetleft is 1990");
+
+        equal(dropTarget, null, "drop target was not set");
+
+
+    });
 };
