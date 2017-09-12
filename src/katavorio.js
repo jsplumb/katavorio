@@ -62,13 +62,13 @@
         var box = elem.getBoundingClientRect(),
             body = document.body,
             docElem = document.documentElement,
-        // (2)
+            // (2)
             scrollTop = window.pageYOffset || docElem.scrollTop || body.scrollTop,
             scrollLeft = window.pageXOffset || docElem.scrollLeft || body.scrollLeft,
-        // (3)
+            // (3)
             clientTop = docElem.clientTop || body.clientTop || 0,
             clientLeft = docElem.clientLeft || body.clientLeft || 0,
-        // (4)
+            // (4)
             top  = box.top +  scrollTop - clientTop,
             left = box.left + scrollLeft - clientLeft;
 
@@ -105,17 +105,21 @@
             }
             else {
                 var ts = _touches(e), t = _getTouch(ts, 0);
+
                 // for IE9 pageX might be null if the event was synthesized. We try for pageX/pageY first,
                 // falling back to clientX/clientY if necessary. In every other browser we want to use pageX/pageY.
+                if (isIE9) {
+                    return [t.pageX || t.clientX, t.pageY || t.clientY];
+                }
                 return isIE9 ? [t.pageX || t.clientX, t.pageY || t.clientY] : [t.pageX, t.pageY];
             }
         },
         _getTouch = function(touches, idx) { return touches.item ? touches.item(idx) : touches[idx]; },
         _touches = function(e) {
             return e.touches && e.touches.length > 0 ? e.touches :
-                    e.changedTouches && e.changedTouches.length > 0 ? e.changedTouches :
+                e.changedTouches && e.changedTouches.length > 0 ? e.changedTouches :
                     e.targetTouches && e.targetTouches.length > 0 ? e.targetTouches :
-                [ e ];
+                        [ e ];
         },
         _classes = {
             draggable:"katavorio-draggable",    // draggable elements
@@ -160,8 +164,8 @@
             }
         },
         _defaultInputFilterSelector = "input,textarea,select,button,option",
-    //
-    // filters out events on all input elements, like textarea, checkbox, input, select.
+        //
+        // filters out events on all input elements, like textarea, checkbox, input, select.
         _inputFilter = function(e, el, _katavorio) {
             var t = e.srcElement || e.target;
             return !matchesSelector(t, _katavorio.getInputFilterSelector(), el);
@@ -212,6 +216,8 @@
     var FALSE = function() { return false; };
 
     var Drag = function(el, params, css, scope) {
+        this.API = API();
+
         this._class = css.draggable;
         var k = Super.apply(this, arguments);
         this.rightButtonCanDrag = this.params.rightButtonCanDrag;
@@ -282,7 +288,6 @@
 
         _setConstrain(typeof this.params.constrain === "function" ? this.params.constrain  : (this.params.constrain || this.params.containment));
 
-
         /**
          * Sets whether or not the Drag is constrained. A value of 'true' means constrain to parent bounds; a function
          * will be executed and returns true if the position is allowed.
@@ -310,7 +315,7 @@
                     return obj;
                 }
             },
-        // a map of { spec -> [ fn, exclusion ] } entries.
+            // a map of { spec -> [ fn, exclusion ] } entries.
             _filters = {},
             _testFilter = function(e) {
                 for (var key in _filters) {
@@ -335,7 +340,7 @@
                             }
                             return m;
                         },
-                            _exclude !== false
+                        _exclude !== false
                     ];
 
                 }
@@ -375,13 +380,22 @@
                     }
                     consumeStartEvent && _consume(e);
                     downAt = _pl(e);
-                    //
+
                     this.params.bind(document, "mousemove", this.moveListener);
                     this.params.bind(document, "mouseup", this.upListener);
                     k.markSelection(this);
                     k.markPosses(this);
+
+                    // Add helpers
                     this.params.addClass(document.body, css.noSelect);
+
                     _dispatch("beforeStart", {el:this.el, pos:posAtDown, e:e, drag:this});
+
+                    console.info('start');
+                    this.API.setDownAt(downAt);
+                    this.API.setInitCords();
+                    this.API.addDragHelperClass();
+                    this.API.setNewPosition(dragEl.getBoundingClientRect());
                 }
                 else if (this.params.consumeFilteredEvents) {
                     _consume(e);
@@ -404,10 +418,14 @@
                 // again that we are currently dragging.
                 if (downAt) {
                     intersectingDroppables.length = 0;
-                    var pos = _pl(e), dx = pos[0] - downAt[0], dy = pos[1] - downAt[1],
+                    var pos = _pl(e),
+                        dx = pos[0] - downAt[0],
+                        dy = pos[1] - downAt[1],
                         z = this.params.ignoreZoom ? 1 : k.getZoom();
+                    z || (z=1);
                     dx /= z;
                     dy /= z;
+
                     this.moveBy(dx, dy, e);
                     k.updateSelection(dx, dy, this);
                     k.updatePosses(dx, dy, this);
@@ -416,12 +434,17 @@
         }.bind(this);
 
         this.upListener = function(e) {
+            this.API.removeHelperDragClasses();
+            this.API.removeDragHelperClass();
+
             if (downAt) {
                 downAt = null;
+                this.API.setDownAt(null);
                 this.params.unbind(document, "mousemove", this.moveListener);
                 this.params.unbind(document, "mouseup", this.upListener);
                 this.params.removeClass(document.body, css.noSelect);
                 this.unmark(e);
+
                 k.unmarkSelection(this, e);
                 k.unmarkPosses(this, e);
                 this.stop(e);
@@ -505,6 +528,9 @@
                     positions.push([ dragEl, {left:dPos[0], top:dPos[1]}, this ]);
                 }
 
+                this.API.setNewPosition(dragEl.getBoundingClientRect());
+                this.API.removeHelperDragClasses();
+
                 _dispatch("stop", {
                     el: dragEl,
                     pos: ghostProxyOffsets || dPos,
@@ -518,6 +544,8 @@
 
         this.mark = function(andNotify) {
             posAtDown = this.params.getPosition(dragEl);
+            this.API.setPosAtDown(posAtDown);
+
             pagePosAtDown = this.params.getPosition(dragEl, true);
             pageDelta = [pagePosAtDown[0] - posAtDown[0], pagePosAtDown[1] - posAtDown[1]];
             this.size = this.params.getSize(dragEl);
@@ -560,58 +588,57 @@
                 }
             }
         };
+
+        this.calculateCPos = function (dx, dy, _posAtDown, _dragEl) {
+            _posAtDown || (_posAtDown = posAtDown);
+            _dragEl || (_dragEl = dragEl);
+
+            var desiredLoc = [
+                (_posAtDown[0] + dx),
+                (_posAtDown[1] + dy)
+            ];
+
+            var cPos = constrain(desiredLoc, _dragEl);
+            return [parseInt(cPos[0], 10),parseInt(cPos[1], 10)];
+        };
+
         this.moveBy = function(dx, dy, e) {
+            var cPos = this.calculateCPos(dx, dy);
             intersectingDroppables.length = 0;
-            var desiredLoc = this.toGrid([posAtDown[0] + dx, posAtDown[1] + dy]),
-                cPos = constrain(desiredLoc, dragEl);
 
-            if (useGhostProxy(this.el)) {
-                if (desiredLoc[0] != cPos[0] || desiredLoc[1] != cPos[1]) {
-                    if (!isConstrained) {
-                        var gp = ghostProxy(this.el);
-                        params.addClass(gp, _classes.ghostProxy);
-                        this.el.parentNode.appendChild(gp);
-                        dragEl = gp;
-                        isConstrained = true;
-                    }
-                    cPos = desiredLoc;
-                }
-                else {
-                    if (isConstrained) {
-                        this.el.parentNode.removeChild(dragEl);
-                        dragEl = this.el;
-                        isConstrained = false;
-                    }
-                }
-            }
+            this.API.autoPanOnDrag(e);
+            this.API.drawArrowConnector(this, e, cPos, this.checkIntersections, _dispatch);
+        };
 
-            var rect = { x:cPos[0], y:cPos[1], w:this.size[0], h:this.size[1]},
+        this.checkIntersections = function (cPos, e, ctx) {
+            var rect = { x: cPos[0], y: cPos[1], w:ctx.size[0], h:ctx.size[1]},
                 pageRect = { x:rect.x + pageDelta[0], y:rect.y + pageDelta[1], w:rect.w, h:rect.h},
                 focusDropElement = null;
 
-
-
-            this.params.setPosition(dragEl, cPos);
             for (var i = 0; i < matchingDroppables.length; i++) {
-                var r2 = { x:matchingDroppables[i].pagePosition[0], y:matchingDroppables[i].pagePosition[1], w:matchingDroppables[i].size[0], h:matchingDroppables[i].size[1]};
-                if (this.params.intersects(pageRect, r2) && (_multipleDrop || focusDropElement == null || focusDropElement == matchingDroppables[i].el) && matchingDroppables[i].canDrop(this)) {
+                var r2 = {
+                    x:matchingDroppables[i].pagePosition[0],
+                    y:matchingDroppables[i].pagePosition[1],
+                    w:matchingDroppables[i].size[0],
+                    h:matchingDroppables[i].size[1]
+                };
+
+                if (
+                    ctx.params.intersects(pageRect, r2) &&
+                    (_multipleDrop || focusDropElement == null || focusDropElement == matchingDroppables[i].el) && matchingDroppables[i].canDrop(ctx)
+                ) {
                     if (!focusDropElement) focusDropElement = matchingDroppables[i].el;
                     intersectingDroppables.push(matchingDroppables[i]);
-                    matchingDroppables[i].setHover(this, true, e);
+                    matchingDroppables[i].setHover(ctx, true, e);
                 }
                 else if (matchingDroppables[i].isHover()) {
-                    matchingDroppables[i].setHover(this, false, e);
+                    matchingDroppables[i].setHover(ctx, false, e);
                 }
             }
-
-            _dispatch("drag", {el:this.el, pos:cPos, e:e, drag:this});
-
-            /* test to see if the parent needs to be scrolled (future)
-             if (scroll) {
-             var pnsl = dragEl.parentNode.scrollLeft, pnst = dragEl.parentNode.scrollTop;
-             console.log("scroll!", pnsl, pnst);
-             }*/
         };
+
+        // ----------------------------------------
+
         this.destroy = function() {
             this.params.unbind(this.el, "mousedown", this.downListener);
             this.params.unbind(document, "mousemove", this.moveListener);
@@ -619,6 +646,8 @@
             this.downListener = null;
             this.upListener = null;
             this.moveListener = null;
+
+            this.API.clearAutoDrag();
         };
 
         // init:register mousedown, and perhaps set a filter
@@ -627,10 +656,11 @@
         // if handle provded, use that.  otherwise, try to set a filter.
         // note that a `handle` selector always results in filterExclude being set to false, ie.
         // the selector defines the handle element(s).
-        if (this.params.handle)
+        if (this.params.handle) {
             _setFilter(this.params.handle, false);
-        else
+        } else {
             _setFilter(this.params.filter, this.params.filterExclude);
+        }
     };
 
     var Drop = function(el, params, css, scope) {
@@ -663,7 +693,6 @@
             // if turning off hover but this was not the drag that caused the hover, ignore.
             if (val || this.el._katavorioDragHover == null || this.el._katavorioDragHover == drag.el._katavorio) {
                 this.params[val ? "addClass" : "removeClass"](this.el, this._hoverClass);
-                //this.el._katavorioDragHover = val ? drag.el._katavorio : null;
                 this.el._katavorioDragHover = val ? drag.el._katavorio : null;
                 if (hover !== val)
                     this.params.events[val ? "over" : "out"]({el:this.el, e:e, drag:drag, drop:this});
@@ -679,9 +708,7 @@
             this._class = null;
             this._activeClass = null;
             this._hoverClass = null;
-            //this.params = null;
             hover = null;
-            //this.el = null;
         };
     };
 
@@ -702,6 +729,195 @@
         if (el == null) return null;
         el._katavorio = el._katavorio || _uuid();
         return el;
+    };
+
+    var API = function () {
+        var globalVars = {
+            autoPanOnDrag: true,
+            firstCentered: false,
+            dragHelperClass: 'autodrag',
+            dragHelperPosClasses: ['autodrag-top', 'autodrag-right', 'autodrag-bottom', 'autodrag-left'],
+            container: null,
+            autoDragIntervalId: null,
+            initCords: {zoom: 1, x: 0, y:0},
+            initMousePos: {x: 0, y: 0},
+            pan: {x:0, y:0},
+            displacementSpeedLimit: 100,
+            proximityTrigger: 50,
+            isAutoDrag: false,
+            downAt: null,
+            posAtDown: [],
+            body: null
+        };
+        var publicMethods = {
+            getBody: function () {
+                return globalVars.body || (globalVars.body = document.querySelector('body'));
+            },
+            setInitCords: function (data) {
+                globalVars.initCords = this.getCords();
+            },
+            setDownAt: function (data) {
+                globalVars.downAt = data;
+            },
+            setPosAtDown: function (data) {
+                globalVars.posAtDown = data;
+            },
+            setContainer: function () {
+                globalVars.container || (globalVars.container = document.getElementsByClassName('stage-contents')[0]);
+            },
+            getCords: function () {
+                this.setContainer();
+
+                var scene = globalVars;
+                var style = getComputedStyle(scene.container),
+                    transform = style.transform || style.webkitTransform || style.mozTransform;
+
+                var mat = transform ? transform.match(/^matrix\((.+)\)$/) : null;
+                var cords = scene.initCords;
+
+                if (mat) {
+                    cords = {
+                        zoom: parseFloat(mat[1].split(', ')[0]),
+                        x: parseFloat(mat[1].split(', ')[4]),
+                        y: parseFloat(mat[1].split(', ')[5])
+                    }
+                }
+
+                return cords;
+            },
+            setNewPosition: function (targetBound) {
+                var cords = this.getCords();
+                globalVars.pan = cords;
+
+                if (targetBound) {
+                    globalVars.initMousePos.x = targetBound.left
+                    globalVars.initMousePos.y = targetBound.top;
+                }
+            },
+            addDragHelperClass: function () {
+                this.getBody().classList.add(globalVars.dragHelperClass);
+            },
+            removeDragHelperClass: function () {
+                this.getBody().classList.remove(globalVars.dragHelperClass);
+            },
+            autoPanOnDrag: function (e) {
+                var scene = globalVars,
+                    cords = this.getCords(),
+                    pan;
+
+                if (!scene.autoPanOnDrag || !e) {
+                    return false;
+                }
+
+                pan = {
+                    x: (scene.pan.x) + ((scene.initMousePos.x - e.clientX) * cords.zoom),
+                    y: (scene.pan.y) + ((scene.initMousePos.y - e.clientY) * cords.zoom)
+                }
+
+                this.panArea(pan);
+            },
+            calculateAutoDragParams: function (panDirection, arrowCords, e) {
+                var cords = this.getCords(),
+                    pan = cords,
+                    newArrowCords,
+                    accel,
+                    pos = _pl(e),
+                    dx = pos[0] - globalVars.downAt[0],
+                    dy = pos[1] - globalVars.downAt[1];
+
+                panDirection.map(function (direction) {
+                    switch (direction) {
+                        case 'left':
+                            accel = parseInt((globalVars.proximityTrigger - e.clientX), 10) * 2;
+                            (accel > globalVars.displacementSpeedLimit) && (accel = globalVars.displacementSpeedLimit);
+                            pan.x += accel;
+                            break;
+                        case 'right':
+                            accel = parseInt(e.clientX - (window.innerWidth - globalVars.proximityTrigger), 10);
+                            (accel > globalVars.displacementSpeedLimit) && (accel = globalVars.displacementSpeedLimit);
+                            pan.x -= accel;
+                            break;
+                        case 'top':
+                            accel = parseInt((globalVars.proximityTrigger*3 - e.clientY), 10);
+                            (accel > globalVars.displacementSpeedLimit) && (accel = globalVars.displacementSpeedLimit);
+                            pan.y += accel;
+                            break;
+                        case 'bottom':
+                            accel = parseInt(e.clientY - (window.innerHeight - globalVars.proximityTrigger), 10);
+                            (accel > globalVars.displacementSpeedLimit) && (accel = globalVars.displacementSpeedLimit);
+                            pan.y -= accel;
+                            break;
+                    }
+                });
+
+                newArrowCords = [
+                    (dx + globalVars.posAtDown[0] * cords.zoom + (globalVars.initCords.x - cords.x)) / cords.zoom,
+                    (dy + globalVars.posAtDown[1] * cords.zoom + (globalVars.initCords.y - cords.y)) / cords.zoom
+                ];
+
+                return {
+                    pan: pan,
+                    arrowCords: newArrowCords
+                };
+            },
+            clearAutoDrag: function () {
+                var scene = globalVars;
+                scene.isAutoDrag = false;
+                scene.autoDragIntervalId && clearInterval(scene.autoDragIntervalId);
+            },
+            drawArrowConnector: function(ctx, e, arrowCords, checkIntersections, callback) {
+                var scene = globalVars,
+                    panDirection = [];
+
+                if (e.clientX < scene.proximityTrigger) panDirection.push('left');
+                if (e.clientX > (window.innerWidth - scene.proximityTrigger)) panDirection.push('right');
+                if (e.clientY < (scene.proximityTrigger * 3)) panDirection.push('top');
+                if (e.clientY > (window.innerHeight - scene.proximityTrigger)) panDirection.push('bottom');
+
+                this.moveCanvasTo(panDirection, ctx, e, arrowCords, checkIntersections, callback);
+            },
+            moveCanvasTo: function(panDirection, ctx, e, arrowCords, checkIntersections, callback) {
+                ctx.API.clearAutoDrag();
+
+                var moveCanvasParams = ctx.API.calculateAutoDragParams(panDirection, arrowCords, e);
+                var newArrowCords = moveCanvasParams.arrowCords;
+
+                checkIntersections(newArrowCords, e, ctx);
+                callback && callback('drag', {el: ctx.el, pos: newArrowCords, e: e, drag: ctx});
+
+                if (!panDirection.length) {
+                    this.removeHelperDragClasses();
+                    return false;
+                }
+
+                var cords = ctx.API.getCords();
+                var scene = globalVars;
+                var pan = moveCanvasParams.pan;
+
+                ctx.API.panArea(pan);
+                scene.isAutoDrag = true;
+                scene.pan = cords;
+                scene.initMousePos.x = e.clientX;
+                scene.initMousePos.y = e.clientY;
+                scene.autoDragIntervalId = setInterval(ctx.API.moveCanvasTo, 100, panDirection, ctx, e, newArrowCords, checkIntersections, callback);
+
+                // Refactor this map
+                panDirection.map(function (direction) {
+                    ctx.API.getBody().classList.add('autodrag-' + direction);
+                });
+
+            },
+            removeHelperDragClasses: function () {
+                this.getBody().classList.remove(...globalVars.dragHelperPosClasses);
+            },
+            panArea: function (pan) {
+                var scene = globalVars;
+                pan.zoom || (pan.zoom = this.getCords().zoom);
+                scene.container.style.transform = "translate(" + pan.x + "px, " + pan.y + "px) scale(" + pan.zoom + ")";
+            }
+        }
+
+        return publicMethods;
     };
 
     root.Katavorio = function(katavorioParams) {
@@ -1167,13 +1383,12 @@
                 });
             }
         };
-
     };
-
+    root.Katavorio.drag = Drag;
+    root.Katavorio.API = API;
     root.Katavorio.version = "0.19.2";
 
     if (typeof exports !== "undefined") {
         exports.Katavorio = root.Katavorio;
     }
-
 }).call(typeof window !== 'undefined' ? window : this);
