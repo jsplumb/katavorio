@@ -391,7 +391,6 @@
 
                     _dispatch("beforeStart", {el:this.el, pos:posAtDown, e:e, drag:this});
 
-                    console.info('start');
                     this.API.setDownAt(downAt);
                     this.API.setInitCords();
                     this.API.addDragHelperClass();
@@ -753,7 +752,7 @@
             getBody: function () {
                 return globalVars.body || (globalVars.body = document.querySelector('body'));
             },
-            setInitCords: function (data) {
+            setInitCords: function () {
                 globalVars.initCords = this.getCords();
             },
             setDownAt: function (data) {
@@ -786,11 +785,10 @@
                 return cords;
             },
             setNewPosition: function (targetBound) {
-                var cords = this.getCords();
-                globalVars.pan = cords;
+                globalVars.pan = this.getCords();
 
                 if (targetBound) {
-                    globalVars.initMousePos.x = targetBound.left
+                    globalVars.initMousePos.x = targetBound.left;
                     globalVars.initMousePos.y = targetBound.top;
                 }
             },
@@ -812,7 +810,7 @@
                 pan = {
                     x: (scene.pan.x) + ((scene.initMousePos.x - e.clientX) * cords.zoom),
                     y: (scene.pan.y) + ((scene.initMousePos.y - e.clientY) * cords.zoom)
-                }
+                };
 
                 this.panArea(pan);
             },
@@ -908,14 +906,14 @@
 
             },
             removeHelperDragClasses: function () {
-                this.getBody().classList.remove(...globalVars.dragHelperPosClasses);
+                this.getBody().classList.remove.apply(this, globalVars.dragHelperPosClasses);
             },
             panArea: function (pan) {
                 var scene = globalVars;
                 pan.zoom || (pan.zoom = this.getCords().zoom);
                 scene.container.style.transform = "translate(" + pan.x + "px, " + pan.y + "px) scale(" + pan.zoom + ")";
             }
-        }
+        };
 
         return publicMethods;
     };
