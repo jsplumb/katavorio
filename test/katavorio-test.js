@@ -25,7 +25,13 @@ var divs = [],
         k = null;
     },
     k,
-    seh = new DefaultKatavorioHelper();
+    seh = new DefaultKatavorioHelper(),
+    _loc = function(el) {
+        return [
+            parseInt(el.style.left, 10),
+            parseInt(el.style.top, 10)
+        ];
+    };
 
 var testSuite = function () {
 
@@ -1641,6 +1647,79 @@ var testSuite = function () {
 
         equal(dropTarget, null, "drop target was not set");
 
+    });
+
+    test("constrain drag to grid, default value of [10,10]", function() {
+        var d1 = _add("d1", null, [0,0], [100,100]);
+        var m = new Mottle();
+
+        k.draggable(d1, {
+            grid:[10,10]
+        });
+
+        // mousedown
+        trigger(m, d1, "mousedown", 0,0);
+        trigger(m, document, "mousemove", 25, 45);
+
+        // having moved the element to [25,45] it should in fact be snapped to [20,40] - the closest multiples of 10 in each axis.
+        equal(20, _loc(d1)[0], "left clamped to 20px during drag");
+        equal(40, _loc(d1)[1], "top clamped to 40px during drag");
+
+        trigger(m, document, "mouseup", 25, 45);
+        // mouseup: the element should be dropped at that clamped location we just tested
+        equal(20, _loc(d1)[0], "left clamped to 20px after mouse up");
+        equal(40, _loc(d1)[1], "top clamped to 40px after mouse up");
+
+        // now test when the clamping increases the value in order to snap
+        trigger(m, d1, "mousedown", 20,40);
+        trigger(m, document, "mousemove", 236, 456);
+        equal(_loc(d1)[0], 240, "left clamped to 240px during drag");
+        equal(_loc(d1)[1], 460, "top clamped to 460px during drag");
+
+        trigger(m, document, "mouseup", 236, 456);
+        equal(240, _loc(d1)[0], "left clamped to 230px after mouse up");
+        equal(460, _loc(d1)[1], "top clamped to 460px after mouse up");
+
+    });
+
+    test("constrain drag to grid, non default value of [50,50]", function() {
+        var d1 = _add("d1", null, [0,0], [100,100]);
+        var m = new Mottle();
+
+        k.draggable(d1, {
+            grid:[50,50]
+        });
+
+        // mousedown
+        trigger(m, d1, "mousedown", 0,0);
+        trigger(m, document, "mousemove", 30, 90);
+
+        // having moved the element to [30, 90] it should in fact be snapped to [50,100] - the closest multiples of 50 in each axis.
+        equal(50, _loc(d1)[0], "left clamped to 50px during drag");
+        equal(100, _loc(d1)[1], "top clamped to 100px during drag");
+
+        trigger(m, document, "mousemove", 30, 90);
+        equal(50, _loc(d1)[0], "left clamped to 50px after mouse up");
+        equal(100, _loc(d1)[1], "top clamped to 100px after mouse up");
+        //
+        // now test when the clamping decreases the value in order to snap
+        trigger(m, d1, "mousedown",0,0);
+        trigger(m, document, "mousemove", 224, 424);
+        equal(200, _loc(d1)[0], "left clamped to 200px during drag");
+        equal(400, _loc(d1)[1], "top clamped to 400px during drag");
+
+        trigger(m, document, "mousemove", 224, 424);
+        equal(200, _loc(d1)[0], "left clamped to 200px after mouse up");
+        equal(400, _loc(d1)[1], "top clamped to 400px after mouse up");
+
+        trigger(m, d1, "mousedown",0,0);
+        trigger(m, document, "mousemove", 634, 1424);
+        equal(650, _loc(d1)[0], "left clamped to 650px during drag");
+        equal(1400, _loc(d1)[1], "top clamped to 1400px during drag");
+
+        trigger(m, document, "mousemove", 634, 1424);
+        equal(650, _loc(d1)[0], "left clamped to 650px after mouse up");
+        equal(1400, _loc(d1)[1], "top clamped to 1400px after mouse up");
 
     });
 };
