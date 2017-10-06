@@ -307,7 +307,7 @@
         };
 
         var _assignId = function(obj) {
-                if (typeof obj == "function") {
+                if (typeof obj === "function") {
                     obj._katavorioId = _uuid();
                     return obj._katavorioId;
                 } else {
@@ -346,7 +346,7 @@
             },
             _addFilter = this.addFilter = _setFilter,
             _removeFilter = this.removeFilter = function(f) {
-                var key = typeof f == "function" ? f._katavorioId : f;
+                var key = typeof f === "function" ? f._katavorioId : f;
                 delete _filters[key];
             };
 
@@ -528,10 +528,15 @@
             matchingDroppables = k.getMatchingDroppables(this);
             _setDroppablesActive(matchingDroppables, true, false, this);
             this.params.addClass(dragEl, this.params.dragClass || css.drag);
-            //if (this.params.constrain || this.params.containment) {
-            var cs = this.params.getSize(dragEl.parentNode);
-            constrainRect = { w:cs[0], h:cs[1] };
-            //}
+
+            var cs;
+            if (this.params.getConstrainingRectangle) {
+                cs = this.params.getConstrainingRectangle(dragEl)
+            } else {
+                cs = this.params.getSize(dragEl.parentNode);
+            }
+            constrainRect = {w: cs[0], h: cs[1]};
+
             if (andNotify) {
                 k.notifySelectionDragStart(this);
             }
@@ -539,7 +544,6 @@
         var ghostProxyOffsets;
         this.unmark = function(e, doNotCheckDroppables) {
             _setDroppablesActive(matchingDroppables, false, true, this);
-
 
             if (isConstrained && useGhostProxy(this.el)) {
                 ghostProxyOffsets = [dragEl.offsetLeft, dragEl.offsetTop];
