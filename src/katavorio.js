@@ -398,9 +398,13 @@
                 if (!moving) {
                     var _continue = _dispatch("start", {el:this.el, pos:posAtDown, e:e, drag:this});
                     if (_continue !== false) {
-                        if (!downAt) return;
+                        if (!downAt) {
+                            return;
+                        }
                         this.mark(true);
                         moving = true;
+                    } else {
+                        this.abort();
                     }
                 }
 
@@ -479,14 +483,19 @@
         };
 
         var _dispatch = function(evt, value) {
+            var result = null;
             if (listeners[evt]) {
                 for (var i = 0; i < listeners[evt].length; i++) {
                     try {
-                        listeners[evt][i](value);
+                        var v = listeners[evt][i](value);
+                        if (v != null) {
+                            result = v;
+                        }
                     }
                     catch (e) { }
                 }
             }
+            return result;
         };
 
         this.notifyStart = function(e) {
