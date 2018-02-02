@@ -1310,6 +1310,40 @@ var testSuite = function () {
 
     });
 
+    test("cloned node tests", function() {
+        //"katavorio-clone-drag"
+
+        var d = _add("d1", null, [0, 0]),
+            d2 = _add("d2", d, [10, 10]),
+            d3 = _add("d3", null, [500, 500]),
+            d4 = _add("d3", d3, [10, 10]),
+            m = new Mottle();
+
+        d.style.width = "300px";
+        d3.style.width = "300px";
+        d.style.height = "300px";
+        d3.style.height = "300px";
+
+        k.draggable([d, d2, d3], {
+            clone: true
+        });
+
+        var dropped = false;
+        k.droppable([d, d3], {
+            drop: function () {
+                dropped = true;
+            }
+        });
+
+        trigger(m, d2, "mousedown", 0, 0);
+        trigger(m, document, "mousemove", 550, 550);
+        // should now be a cloned node in play
+        ok(document.querySelectorAll(".katavorio-clone-drag").length == 1, "there is a cloned node active");
+        trigger(m, document, "mouseup", 550, 550);
+        ok(dropped, "drop event occurred");
+        ok(document.querySelectorAll(".katavorio-clone-drag").length == 0, "there are no cloned nodes active");
+    })
+
 
     test("ghost proxy tests", function () {
         var d = _add("d1", null, [0, 0]),
