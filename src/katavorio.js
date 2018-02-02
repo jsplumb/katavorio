@@ -125,7 +125,8 @@
             active : "katavorio-drag-active",   // droppables that are targets of a currently dragged element
             hover : "katavorio-drag-hover",     // droppables over which a matching drag element is hovering
             noSelect : "katavorio-drag-no-select", // added to the body to provide a hook to suppress text selection
-            ghostProxy:"katavorio-ghost-proxy"  // added to a ghost proxy element in use when a drag has exited the bounds of its parent.
+            ghostProxy:"katavorio-ghost-proxy",  // added to a ghost proxy element in use when a drag has exited the bounds of its parent.
+            clonedDrag:"katavorio-clone-drag"     // added to a node that is a clone of an element created at the start of a drag
         },
         _defaultScope = "katavorio-drag-scope",
         _events = [ "stop", "start", "drag", "drop", "over", "out", "beforeStart" ],
@@ -375,6 +376,7 @@
                         var b = getOffsetRect(this.el);
                         dragEl.style.left = b.left + "px";
                         dragEl.style.top = b.top + "px";
+                        dragEl.className = _classes.clonedDrag;
                         document.body.appendChild(dragEl);
                     }
                     consumeStartEvent && _consume(e);
