@@ -376,7 +376,7 @@
                         var b = getOffsetRect(this.el);
                         dragEl.style.left = b.left + "px";
                         dragEl.style.top = b.top + "px";
-                        dragEl.className = _classes.clonedDrag;
+                        this.params.addClass(dragEl, _classes.clonedDrag);
                         document.body.appendChild(dragEl);
                     }
                     consumeStartEvent && _consume(e);
