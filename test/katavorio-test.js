@@ -1338,11 +1338,11 @@ var testSuite = function () {
         trigger(m, d2, "mousedown", 0, 0);
         trigger(m, document, "mousemove", 550, 550);
         // should now be a cloned node in play
-        ok(document.querySelectorAll(".katavorio-clone-drag").length == 1, "there is a cloned node active");
+        ok(document.querySelectorAll(".katavorio-clone-drag").length === 1, "there is a cloned node active");
         trigger(m, document, "mouseup", 550, 550);
         ok(dropped, "drop event occurred");
-        ok(document.querySelectorAll(".katavorio-clone-drag").length == 0, "there are no cloned nodes active");
-    })
+        ok(document.querySelectorAll(".katavorio-clone-drag").length === 0, "there are no cloned nodes active");
+    });
 
 
     test("ghost proxy tests", function () {
