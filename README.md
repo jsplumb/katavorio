@@ -1,4 +1,4 @@
-### Katavorio
+## Katavorio
 
 
 Katavorio is a lightweight drag/drop handler, supporting containment, multiple element drag, custom css classes, 
@@ -33,3 +33,9 @@ node_modules/katavorio/src/katavorio.js
 
 
 For more information, take a look in [the wiki](https://github.com/jsplumb/katavorio/wiki).
+
+### Changelog
+
+#### 0.26.0
+
+- added the ability to remove specific drag/drop handlers (previous we could only completely switch off drag/drop) 
