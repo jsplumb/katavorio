@@ -1029,17 +1029,48 @@
             }
         };
 
+        var _removeListener = function(el, type, evt, fn) {
+            el = _gel(el);
+            if (el[type]) {
+                el[type].off(evt, fn);
+            }
+        };
+
         this.elementRemoved = function(el) {
             this.destroyDraggable(el);
             this.destroyDroppable(el);
         };
 
-        this.destroyDraggable = function(el) {
-            _destroy(el, "_katavorioDrag", this._dragsByScope);
+        /**
+         * Either completely remove drag functionality from the given element, or remove a specific event handler. If you
+         * call this method with a single argument - the element - all drag functionality is removed from it. Otherwise, if
+         * you provide an event name and listener function, this function is de-registered (if found).
+         * @param el Element to update
+         * @param {string} [evt] Optional event name to unsubscribe
+         * @param {Function} [fn] Optional function to unsubscribe
+         */
+        this.destroyDraggable = function(el, evt, fn) {
+            if (arguments.length === 1) {
+                _destroy(el, "_katavorioDrag", this._dragsByScope);
+            } else {
+                _removeListener(el, "_katavorioDrag", evt, fn);
+            }
         };
 
-        this.destroyDroppable = function(el) {
-            _destroy(el, "_katavorioDrop", this._dropsByScope);
+        /**
+         * Either completely remove drop functionality from the given element, or remove a specific event handler. If you
+         * call this method with a single argument - the element - all drop functionality is removed from it. Otherwise, if
+         * you provide an event name and listener function, this function is de-registered (if found).
+         * @param el Element to update
+         * @param {string} [evt] Optional event name to unsubscribe
+         * @param {Function} [fn] Optional function to unsubscribe
+         */
+        this.destroyDroppable = function(el, evt, fn) {
+            if (arguments.length === 1) {
+                _destroy(el, "_katavorioDrop", this._dropsByScope);
+            } else {
+                _removeListener(el, "_katavorioDrop", evt, fn);
+            }
         };
 
         this.reset = function() {
