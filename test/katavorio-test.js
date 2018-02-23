@@ -773,6 +773,11 @@ var testSuite = function () {
         stopped = false;
         dragged = false;
         var started2 = false, dragged2 = false, stopped2 = false;
+
+        var dragFn = function () {
+            dragged2 = true;
+        };
+
         k.draggable(d, {
             start: function () {
                 started2 = true;
@@ -780,9 +785,7 @@ var testSuite = function () {
             stop: function () {
                 stopped2 = true;
             },
-            drag: function () {
-                dragged2 = true;
-            }
+            drag: dragFn
         });
 
         m.trigger(foo, "mousedown");
@@ -797,6 +800,20 @@ var testSuite = function () {
         ok(dragged2, "2nd drag event was fired");
 
         ok(d._katavorioDrag.visited, "still using the original drag object");
+
+        // set dragged flag to false, and remove the drag fn only.
+        dragged2 = false; started2 = false; stopped2 = false;
+        k.destroyDraggable(d, "drag", dragFn);
+        m.trigger(foo, "mousedown");
+        m.trigger(document, "mousemove");
+        m.trigger(document, "mouseup");
+
+        ok(stopped, "stop event was fired");
+        ok(stopped2, "2nd stop event was fired");
+        ok(started, "start event was fired");
+        ok(started2, "2nd start event was fired");
+        ok(dragged, "drag event was fired");
+        ok(!dragged2, "2nd drag event was not fired");
     });
 
     var _t = function (m, el, evt, x, y) {
