@@ -277,10 +277,10 @@
         };
 
         var _setConstrain = function(value) {
-            constrain = typeof value === "function" ? value : value ? function(pos) {
+            constrain = typeof value === "function" ? value : value ? function(pos, dragEl, _constrainRect, _size) {
                 return negativeFilter([
-                    Math.max(0, Math.min(constrainRect.w - this.size[0], pos[0])),
-                    Math.max(0, Math.min(constrainRect.h - this.size[1], pos[1]))
+                    Math.max(0, Math.min(_constrainRect.w - _size[0], pos[0])),
+                    Math.max(0, Math.min(_constrainRect.h - _size[1], pos[1]))
                 ]);
             }.bind(this) : function(pos) { return negativeFilter(pos); };
         }.bind(this);
@@ -582,7 +582,7 @@
         this.moveBy = function(dx, dy, e) {
             intersectingDroppables.length = 0;
             var desiredLoc = this.toGrid([posAtDown[0] + dx, posAtDown[1] + dy]),
-                cPos = constrain(desiredLoc, dragEl);
+                cPos = constrain(desiredLoc, dragEl, constrainRect, this.size);
 
             if (useGhostProxy(this.el)) {
                 if (desiredLoc[0] !== cPos[0] || desiredLoc[1] !== cPos[1]) {
@@ -607,8 +607,6 @@
             var rect = { x:cPos[0], y:cPos[1], w:this.size[0], h:this.size[1]},
                 pageRect = { x:rect.x + pageDelta[0], y:rect.y + pageDelta[1], w:rect.w, h:rect.h},
                 focusDropElement = null;
-
-
 
             this.params.setPosition(dragEl, cPos);
             for (var i = 0; i < matchingDroppables.length; i++) {
@@ -1220,7 +1218,7 @@
 
     };
 
-    root.Katavorio.version = "0.23.0";
+    root.Katavorio.version = "0.27.0";
 
     if (typeof exports !== "undefined") {
         exports.Katavorio = root.Katavorio;
