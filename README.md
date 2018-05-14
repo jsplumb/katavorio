@@ -36,6 +36,10 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+#### 0.28.0
+
+- add the ability for a user to specify the parent to use when cloning a node for dragging.
+
 #### 0.26.0
 
 - added the ability to remove specific drag/drop handlers (previous we could only completely switch off drag/drop) 
