@@ -358,7 +358,8 @@
         this.canDrag = this.params.canDrag || _true;
 
         var constrainRect,
-            matchingDroppables = [], intersectingDroppables = [];
+            matchingDroppables = [],
+            intersectingDroppables = [];
 
         this.downListener = function(e) {
             var isNotRightClick = this.rightButtonCanDrag || (e.which !== 3 && e.button !== 2);
@@ -369,15 +370,26 @@
                         dragEl = this.el;
                     else {
                         dragEl = this.el.cloneNode(true);
+                        this.params.addClass(dragEl, _classes.clonedDrag);
+
                         dragEl.setAttribute("id", null);
                         dragEl.style.position = "absolute";
-                        // the clone node is added to the body; getOffsetRect gives us a value
-                        // relative to the body.
-                        var b = getOffsetRect(this.el);
-                        dragEl.style.left = b.left + "px";
-                        dragEl.style.top = b.top + "px";
-                        this.params.addClass(dragEl, _classes.clonedDrag);
-                        document.body.appendChild(dragEl);
+
+                        if (this.params.parent != null) {
+                            var p = this.params.getPosition(this.el);
+                            dragEl.style.left = p[0] + "px";
+                            dragEl.style.top = p[1] + "px";
+                            this.params.parent.appendChild(dragEl);
+                        } else {
+                            // the clone node is added to the body; getOffsetRect gives us a value
+                            // relative to the body.
+                            var b = getOffsetRect(this.el);
+                            dragEl.style.left = b.left + "px";
+                            dragEl.style.top = b.top + "px";
+
+                            document.body.appendChild(dragEl);
+                        }
+
                     }
                     consumeStartEvent && _consume(e);
                     downAt = _pl(e);
