@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+<head>
+
+    <style>
+        .c {
+            width:250px; height:250px; border:1px solid cadetblue; position:absolute;background-color: mintcream;
+        }
+
+        body {
+
+        }
+
+        #palette {
+            margin-top:150px;
+            margin-left:50px;
+            position:relative;
+            border:4px solid #CCC;
+            width:600px;
+            height:600px;
+        }
+
+        .item {
+            position:absolute;
+            outline:1px solid red;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding:7px;
+            width:80px;
+            height:40px;
+        }
+
+
+        .one {
+            left:150px;
+            top:50px;
+        }
+
+        .two {
+            left:400px;
+            top:350px;
+        }
+
+        .katavorio-ghost-proxy {
+            opacity:0.8;
+            outline:1px solid red;
+            z-index:1000;
+        }
+    </style>
+</head>
+<body>
+
+<div id="palette">
+    <div class="item one">ITEM ONE</div>
+    <div class="item two">ITEM TWO</div>
+</div>
+<div id="dropzone">
+
+</div>
+
+<script src="../src/katavorio.js"></script>
+<script src="../src/default-katavorio-helper.js"></script>
+
+<script>
+    var seh = new DefaultKatavorioHelper();
+    var k = window.k = new Katavorio({
+        getPosition:seh.getPosition,
+        setPosition:seh.setPosition,
+        getSize:seh.getSize,
+        addClass:seh.addClass,
+        removeClass:seh.removeClass,
+        bind:seh.addEvent,
+        unbind:seh.removeEvent,
+        fireEvent:function() {
+            console.log(arguments);
+        },
+        intersects:seh.intersects,
+        indexOf:seh.indexOf
+    });
+
+    k.draggable(palette.querySelectorAll(".item"), {
+        clone:true,
+        parent:palette
+    });
+
+</script>
+</body>
+</html>
