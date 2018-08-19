@@ -822,8 +822,8 @@ var testSuite = function () {
 
     test("elements dragged to correct location", function () {
         var d = _add("d1"),
-            foo = _add("foo", d),
-            bar = _add("bar", d),
+            //foo = _add("foo", d),
+            //bar = _add("bar", d),
             m = new Mottle(),
             started = false,
             stopped = false;
@@ -851,6 +851,43 @@ var testSuite = function () {
 
         equal(parseInt(d.style.left, 10), 150, "left position correct after drag");
         equal(parseInt(d.style.top, 10), 150, "top position correct after drag");
+    });
+
+    test("elements dragged to correct location, using delegate", function () {
+        var d = _add("d1", null, [0,0], [500,500]),
+            foo = _add("foo", d, [20,20], [50,50]),
+            bar = _add("bar", d, [100,100], [50,50]),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        foo.className="child";
+        bar.className="child";
+
+        var draggedChild;
+
+        k.draggable(d, {
+            start: function () {
+                started = true;
+            },
+            stop: function (p) {
+                stopped = true;
+                draggedChild = p.el;
+            },
+            selector:".child"
+        });
+
+        _t(m, foo, "mousedown", 30, 30);
+        _t(m, document, "mousemove", 100, 100);
+        ok(foo.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!foo.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(foo.style.left, 10), 90, "left position of foo correct after drag");
+        equal(parseInt(foo.style.top, 10), 90, "top position of foo correct after drag");
+
+        equal(foo, draggedChild, "it was Foo that was dragged");
     });
 
     test("elements cannot be dragged to negative values if allowNegative:false", function () {
@@ -884,6 +921,113 @@ var testSuite = function () {
 
         equal(parseInt(d.style.left, 10), 0, "left position correct after drag");
         equal(parseInt(d.style.top, 10), 0, "top position correct after drag");
+    });
+
+    test("elements cannot be dragged outside of their parent, if constrain:true is set", function () {
+        var d = _add("d1", null, [0,0], [500,500]),
+            foo = _add("foo", d, [0,0], [50,50]),
+            bar = _add("bar", d, [80,80], [50,50]),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        k.draggable(foo, {
+            start: function () {
+                started = true;
+            },
+            stop: function () {
+                stopped = true;
+            },
+            constrain:true
+        });
+
+
+        _t(m, foo, "mousedown", 0, 0);
+        _t(m, document, "mousemove", 1000, 1000);
+        ok(foo.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!foo.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(foo.style.left, 10), 450, "left position correct after drag");
+        equal(parseInt(foo.style.top, 10), 450, "top position correct after drag");
+    });
+
+
+    test("elements cannot be dragged to negative values if allowNegative:false, using delegate", function () {
+        var d = _add("d1", null, [0,0], [500,500]),
+            foo = _add("foo", d, [20,20], [50,50]),
+            bar = _add("bar", d, [100,100], [50,50]),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        foo.className="child";
+        bar.className="child";
+
+        var draggedChild;
+
+        k.draggable(d, {
+            allowNegative:false,
+            start: function () {
+                started = true;
+            },
+            stop: function (p) {
+                stopped = true;
+                draggedChild = p.el;
+            },
+            selector:".child"
+        });
+
+        _t(m, foo, "mousedown", 30, 30);
+        _t(m, document, "mousemove", -100, -100);
+        ok(foo.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!foo.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(foo.style.left, 10), 0, "left position of foo correct after drag");
+        equal(parseInt(foo.style.top, 10), 0, "top position of foo correct after drag");
+
+        equal(foo, draggedChild, "it was Foo that was dragged");
+    });
+
+    test("elements cannot be dragged outside of their parent if constrain:true, using delegate", function () {
+        var d = _add("d1", null, [0,0], [500,500]),
+            foo = _add("foo", d, [20,20], [50,50]),
+            bar = _add("bar", d, [100,100], [50,50]),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        foo.className="child";
+        bar.className="child";
+
+        var draggedChild;
+
+        k.draggable(d, {
+            constrain:true,
+            start: function () {
+                started = true;
+            },
+            stop: function (p) {
+                stopped = true;
+                draggedChild = p.el;
+            },
+            selector:".child"
+        });
+
+        _t(m, foo, "mousedown", 30, 30);
+        _t(m, document, "mousemove", 1000, 1000);
+        ok(foo.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!foo.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(foo.style.left, 10), 450, "left position of foo correct after drag");
+        equal(parseInt(foo.style.top, 10), 450, "top position of foo correct after drag");
+
+        equal(foo, draggedChild, "it was Foo that was dragged");
     });
 
 // ---------------------------------------- POSSE TESTS --------------------------------------------------------
@@ -1697,6 +1841,44 @@ var testSuite = function () {
         equal(drag.offsetLeft, 1990, "offsetleft is 1990");
 
         equal(dropTarget, null, "drop target was not set");
+
+    });
+
+    test("droppable, cursor over the target, draggable uses a delegate", function() {
+
+        // the drag element is at [0,0] and of size [50,50].
+
+        var parent = _add("d1", null, [550,550], [500,500]);
+
+        var dragParent = _add("d2", null, [0,0], [300,300]);
+
+        var drag = _add("d3", dragParent, [20,20], [50,50]);
+        drag.className="child";
+
+        var m = new Mottle();
+        var dropTarget = null, draggedElement = null;
+
+        k.droppable(parent, {
+            drop:function(p) {
+                dropTarget = parent;
+                draggedElement = p.drag.getDragElement();
+                return true;
+            },
+            rank:1
+        });
+
+        k.draggable(dragParent, {
+            selector:".child"
+        });
+
+        // drag and drop 'drag' and put the mouse cursor plumb in the target
+        trigger(m, drag, "mousedown", 45, 45);
+        trigger(m, document, "mousemove", 800, 800);
+        trigger(m, document, "mouseup", 800, 800);
+
+        equal(dropTarget, parent, "drop target was parent");
+        equal(drag, draggedElement, "d3 was dragged and dropped");
+
 
     });
 
