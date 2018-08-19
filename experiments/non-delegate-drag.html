@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+
+    <style>
+        .c {
+            width:550px; height:550px; border:1px solid cadetblue; position:absolute;background-color: mintcream;
+        }
+
+        #source {
+            left:50px;
+            top:50px;
+        }
+
+        #target {
+            left:650px;
+            top:70px;
+        }
+
+        .w {
+            width:40px;
+            height:40px;
+            background-color: sienna;position:absolute;cursor:move;
+            z-index:999;
+        }
+
+        .x {
+            width:40px;
+            height:40px;
+            background-color: palevioletred;
+            position:absolute;
+            cursor:move;
+            z-index:999;
+        }
+
+        .inner {
+            width:20px;
+            height:20px;
+            background-color:pink;
+        }
+
+        .katavorio-ghost-proxy {
+            opacity:0.8;
+            outline:1px solid red;
+            z-index:1000;
+        }
+    </style>
+</head>
+<body>
+
+<button>Click to add another W DRAG div. it should be draggable</button>
+<button>Click to add another X DROP div. it should be droppable</button>
+
+<div id="source" class="c"></div>
+<div id="target" class="c"></div>
+
+<script src="../src/katavorio.js"></script>
+<script src="../src/default-katavorio-helper.js"></script>
+
+<script>
+    var seh = new DefaultKatavorioHelper();
+    var k = window.k = new Katavorio({
+        getPosition:seh.getPosition,
+        setPosition:seh.setPosition,
+        getSize:seh.getSize,
+        addClass:seh.addClass,
+        removeClass:seh.removeClass,
+        bind:seh.addEvent,
+        unbind:seh.removeEvent,
+        fireEvent:function() {
+            console.log(arguments);
+        },
+        intersects:seh.intersects,
+        indexOf:seh.indexOf
+    });
+
+
+    // now draw some
+    var w = source.offsetWidth-40, h = source.offsetHeight-40, count = 0;
+    function addOne() {
+        var x = 20 + parseInt(Math.random() * w, 10),
+            y = 20 + parseInt(Math.random() * h, 10),
+            d = document.createElement("div"),
+            i = document.createElement("div");
+
+        d.id = "draggable_" + count++;
+        d.style.left = x + "px";
+        d.style.top = y + "px";
+        d.className = 'w';
+
+        i.className = "inner";
+        d.appendChild(i);
+
+        source.appendChild(d);
+
+        k.draggable(d, {
+            stop:function(p) {
+                console.log("drag ended", p)
+            }
+        });
+    }
+
+    document.querySelector("button").addEventListener("click", addOne);
+
+    for (var i = 0; i < 3000; i++) {
+        addOne();
+    }
+
+    k.droppable(target, {
+        drop:function(p) {
+            var dl = target.offsetLeft - source.offsetLeft,
+                dt = target.offsetTop - source.offsetTop,
+                draggedElement = p.drag.getDragElement();
+
+            draggedElement.style.left = (draggedElement.offsetLeft - dl) + "px";
+            draggedElement.top = (draggedElement.offsetTop - dt) + "px";
+
+            target.appendChild(draggedElement);
+        }
+    });
+</script>
+</body>
+</html>
