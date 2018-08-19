@@ -17,6 +17,11 @@
                 top:70px;
             }
 
+            #source2 {
+                left:50px;
+                top:450px;
+            }
+
             .w {
                 width:60px;height:60px;background-color: sienna;position:absolute;cursor:move;
                 z-index:999;
@@ -36,6 +41,10 @@
         </div>
 
         <div id="target" class="c"></div>
+
+        <div id="source2" class="c">
+            <div class="w" style="left:20px;top:20px"></div>
+        </div>
 
         <script src="../src/katavorio.js"></script>
         <script src="../src/default-katavorio-helper.js"></script>
@@ -65,13 +74,20 @@
             k.droppable(target, {
                 drop:function(p) {
                     var dl = target.offsetLeft - source.offsetLeft,
-                        dt = target.offsetTop - source.offsetTop;
+                        dt = target.offsetTop - source.offsetTop,
+                        draggedElement = p.drag.getDragElement(true);//p.drag.el;
 
-                    p.drag.el.style.left = (p.drag.el.offsetLeft - dl) + "px";
-                    p.drag.el.top = (p.drag.el.offsetTop - dt) + "px";
+                    draggedElement.style.left = (draggedElement.offsetLeft - dl) + "px";
+                    draggedElement.top = (draggedElement.offsetTop - dt) + "px";
 
-                    target.appendChild(p.drag.el);
+                    target.appendChild(draggedElement);
                 }
+            });
+
+            k.draggable(source2, {
+                constrain:true,
+                ghostProxy:true,
+                selector:".w"
             });
         </script>
     </body>
