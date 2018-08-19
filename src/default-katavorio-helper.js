@@ -113,6 +113,16 @@
         };
 
         this.getPosition = function (el) {
+
+            // var out  = [el.offsetLeft, el.offsetTop], op = el.offsetParent;
+            // while (op != null) {
+            //     out[0] += op.offsetLeft;
+            //     out[1] += op.offsetTop;
+            //     op = op.offsetParent;
+            // }
+            //
+            // return out;
+
             return [ el.offsetLeft, el.offsetTop ];
         };
 
