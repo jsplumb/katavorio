@@ -385,8 +385,6 @@
                 var _f =  _testFilter(e) && _inputFilter(e, this.el, this.k);
                 if (_f) {
 
-                    //var elementToDrag;
-
                     if (selector) {
                         elementToDrag = findDelegateElement(this.el, e.target || e.srcElement, selector);
                         if(elementToDrag == null) {
@@ -609,13 +607,9 @@
         this.unmark = function(e, doNotCheckDroppables) {
             _setDroppablesActive(matchingDroppables, false, true, this);
 
-            //if (isConstrained && useGhostProxy(this.el)) {
-
             if (isConstrained && useGhostProxy(elementToDrag)) {
                 ghostProxyOffsets = [dragEl.offsetLeft, dragEl.offsetTop];
-                //this.el.parentNode.removeChild(dragEl);
                 elementToDrag.parentNode.removeChild(dragEl);
-                //dragEl = this.el;
                 dragEl = elementToDrag;
             }
             else {
@@ -627,7 +621,6 @@
             isConstrained = false;
             if (!doNotCheckDroppables) {
                 if (intersectingDroppables.length > 0 && ghostProxyOffsets) {
-                    //params.setPosition(this.el, ghostProxyOffsets);
                     params.setPosition(elementToDrag, ghostProxyOffsets);
                 }
                 intersectingDroppables.sort(_rankSort);
@@ -645,10 +638,8 @@
             if (useGhostProxy(this.el)) {
                 if (desiredLoc[0] !== cPos[0] || desiredLoc[1] !== cPos[1]) {
                     if (!isConstrained) {
-                        //var gp = ghostProxy(this.el);
                         var gp = ghostProxy(elementToDrag);
                         params.addClass(gp, _classes.ghostProxy);
-                        //this.el.parentNode.appendChild(gp);
                         elementToDrag.parentNode.appendChild(gp);
                         dragEl = gp;
                         isConstrained = true;
@@ -657,9 +648,7 @@
                 }
                 else {
                     if (isConstrained) {
-                        //this.el.parentNode.removeChild(dragEl);
                         elementToDrag.parentNode.removeChild(dragEl);
-                        //dragEl = this.el;
                         dragEl = elementToDrag;
                         isConstrained = false;
                     }
@@ -742,10 +731,10 @@
             // if turning off hover but this was not the drag that caused the hover, ignore.
             if (val || this.el._katavorioDragHover == null || this.el._katavorioDragHover === drag.el._katavorio) {
                 this.params[val ? "addClass" : "removeClass"](this.el, this._hoverClass);
-                //this.el._katavorioDragHover = val ? drag.el._katavorio : null;
                 this.el._katavorioDragHover = val ? drag.el._katavorio : null;
-                if (hover !== val)
-                    this.params.events[val ? "over" : "out"]({el:this.el, e:e, drag:drag, drop:this});
+                if (hover !== val) {
+                    this.params.events[val ? "over" : "out"]({el: this.el, e: e, drag: drag, drop: this});
+                }
                 hover = val;
             }
         };
@@ -894,31 +883,22 @@
          */
         this.draggable = function(el, params) {
             var o = [];
-
-            //if(params.selector) {
-
-
-
-            //} else {
-                _each(el, function (_el) {
-                    _el = _gel(_el);
-                    if (_el != null) {
-                        if (_el._katavorioDrag == null) {
-                            var p = _prepareParams(params);
-                            _el._katavorioDrag = new Drag(_el, p, _css, _scope);
-                            _reg(_el._katavorioDrag, this._dragsByScope);
-                            o.push(_el._katavorioDrag);
-                            katavorioParams.addClass(_el, _css.draggable);
-                        }
-                        else {
-                            _mistletoe(_el._katavorioDrag, params);
-                        }
+            _each(el, function (_el) {
+                _el = _gel(_el);
+                if (_el != null) {
+                    if (_el._katavorioDrag == null) {
+                        var p = _prepareParams(params);
+                        _el._katavorioDrag = new Drag(_el, p, _css, _scope);
+                        _reg(_el._katavorioDrag, this._dragsByScope);
+                        o.push(_el._katavorioDrag);
+                        katavorioParams.addClass(_el, _css.draggable);
                     }
-                }.bind(this));
-            //}
-
+                    else {
+                        _mistletoe(_el._katavorioDrag, params);
+                    }
+                }
+            }.bind(this));
             return o;
-
         };
 
         this.droppable = function(el, params) {
@@ -1300,7 +1280,7 @@
 
     };
 
-    root.Katavorio.version = "0.27.0";
+    root.Katavorio.version = "1.0.0";
 
     if (typeof exports !== "undefined") {
         exports.Katavorio = root.Katavorio;
