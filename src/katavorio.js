@@ -477,7 +477,11 @@
                 k.unmarkSelection(this, e);
                 k.unmarkPosses(this, e);
                 this.stop(e);
-                k.notifySelectionDragStop(this, e);
+
+                //k.notifySelectionDragStop(this, e);  removed in 1.1.0 under the "leave it for one release in case it breaks" rule.
+                // it isnt necessary to fire this as the normal stop event now includes a `selection` member that has every dragged element.
+                // firing this event causes consumers who use the `selection` array to process a lot more drag stop events than is necessary
+
                 k.notifyPosseDragStop(this, e);
                 moving = false;
                 if (clone) {
