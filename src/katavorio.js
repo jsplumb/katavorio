@@ -153,9 +153,9 @@
                     fn(l[i]);
             }
         },
-        _setDroppablesActive = function(dd, val, andHover, drag) {
+        _updateDroppables = function(dd, val, andHover, drag, isDroppablesActive) {
             _foreach(dd, function(e) {
-                e.setActive(val);
+                if (isDroppablesActive) e.setActive(val);
                 if (val) e.updatePosition();
                 if (andHover) e.setHover(drag, val);
             });
@@ -231,7 +231,7 @@
         this._class = css.draggable;
         var k = Super.apply(this, arguments);
         this.rightButtonCanDrag = this.params.rightButtonCanDrag;
-        var downAt = [0,0], posAtDown = null, pagePosAtDown = null, pageDelta = [0,0], moving = false,
+        var downAt = [0,0], posAtDown = null, pagePosAtDown = null, isDroppablesActive = null, pageDelta = [0,0], moving = false,
             consumeStartEvent = this.params.consumeStartEvent !== false,
             dragEl = this.el,
             clone = this.params.clone,
@@ -592,7 +592,8 @@
             pageDelta = [pagePosAtDown[0] - posAtDown[0], pagePosAtDown[1] - posAtDown[1]];
             this.size = this.params.getSize(dragEl);
             matchingDroppables = k.getMatchingDroppables(this);
-            _setDroppablesActive(matchingDroppables, true, false, this);
+            isDroppablesActive = this.params.isDroppablesActive || true;
+            _updateDroppables(matchingDroppables, true, false, this, isDroppablesActive);
             this.params.addClass(dragEl, this.params.dragClass || css.drag);
 
             var cs;
@@ -609,7 +610,7 @@
         };
         var ghostProxyOffsets;
         this.unmark = function(e, doNotCheckDroppables) {
-            _setDroppablesActive(matchingDroppables, false, true, this);
+            _updateDroppables(matchingDroppables, false, true, this, true);
 
             if (isConstrained && useGhostProxy(elementToDrag)) {
                 ghostProxyOffsets = [dragEl.offsetLeft, dragEl.offsetTop];
