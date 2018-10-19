@@ -231,7 +231,7 @@
         this._class = css.draggable;
         var k = Super.apply(this, arguments);
         this.rightButtonCanDrag = this.params.rightButtonCanDrag;
-        var downAt = [0,0], posAtDown = null, pagePosAtDown = null, pageDelta = [0,0], moving = false,
+        var downAt = [0,0], posAtDown = null, pagePosAtDown = null, pageDelta = [0,0], moving = false, initialScroll = [0,0],
             consumeStartEvent = this.params.consumeStartEvent !== false,
             dragEl = this.el,
             clone = this.params.clone,
@@ -423,6 +423,10 @@
 
                     consumeStartEvent && _consume(e);
                     downAt = _pl(e);
+                    if (dragEl && dragEl.parentNode)
+                    {
+                        initialScroll = [dragEl.parentNode.scrollLeft, dragEl.parentNode.scrollTop];
+                    }
                     //
                     this.params.bind(document, "mousemove", this.moveListener);
                     this.params.bind(document, "mouseup", this.upListener);
@@ -458,6 +462,11 @@
                     intersectingDroppables.length = 0;
                     var pos = _pl(e), dx = pos[0] - downAt[0], dy = pos[1] - downAt[1],
                         z = this.params.ignoreZoom ? 1 : k.getZoom();
+                    if (dragEl && dragEl.parentNode)
+                    {
+                        dx += dragEl.parentNode.scrollLeft - initialScroll[0];
+                        dy += dragEl.parentNode.scrollTop - initialScroll[1];
+                    }
                     dx /= z;
                     dy /= z;
                     this.moveBy(dx, dy, e);
