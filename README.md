@@ -16,6 +16,8 @@ All is not lost, though, as this project also contains DefaultKatavorioHelper - 
 
 `npm install katavorio`
 
+NOTE: Katavorio does not follow strict semantic versioning.  It is not at all recommended that you use wildcards when specifying a dependency on Katavorio. 
+
 #### Dependencies
 
 None
