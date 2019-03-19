@@ -38,6 +38,12 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+#### 1.3.0
+
+- for delegated draggables (ie when you provide a `selector` in the params), we use the class `katavorio-delegated-draggable` now, instead of
+where we previously used the default draggable class of `katavorio-draggable`. This can also be overridden in the constructor by setting the
+value of `delegatedDraggable`.
+
 #### 0.28.0
 
 - add the ability for a user to specify the parent to use when cloning a node for dragging.
