@@ -133,6 +133,7 @@
                 [ e ];
         },
         _classes = {
+            delegatedDraggable:"katavorio-delegated-draggable",  // elements that are the delegated drag handler for a bunch of other elements
             draggable:"katavorio-draggable",    // draggable elements
             droppable:"katavorio-droppable",    // droppable elements
             drag : "katavorio-drag",            // elements currently being dragged
@@ -904,7 +905,7 @@
                         _el._katavorioDrag = new Drag(_el, p, _css, _scope);
                         _reg(_el._katavorioDrag, this._dragsByScope);
                         o.push(_el._katavorioDrag);
-                        katavorioParams.addClass(_el, _css.draggable);
+                        katavorioParams.addClass(_el, params.selector ? _css.delegatedDraggable : _css.draggable);
                     }
                     else {
                         _mistletoe(_el._katavorioDrag, params);
