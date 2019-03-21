@@ -717,8 +717,11 @@ var testSuite = function () {
                 start: function () {
                     started++;
                 },
-                stop: function () {
+                stop: function (params) {
                     stopped++;
+
+                    equal(1, params.selection.length, "the selection has one element");
+                    equal(d2, params.selection[0][0], "d2 is the first element in the selection");
                 }
             };
 
@@ -727,6 +730,9 @@ var testSuite = function () {
 
         k.select(d2);
 
+        equal(1, k.getSelection().length, "the selection has one element");
+        equal(d2, k.getSelection()[0].el, "d2 is the first element in the selection");
+
         m.trigger(foo, "mousedown");
         m.trigger(document, "mousemove");
         m.trigger(document, "mousemove");
@@ -734,7 +740,7 @@ var testSuite = function () {
         m.trigger(document, "mouseup");
 
         equal(started, 2, "start event was fired twice, once for each element");
-        equal(stopped, 2, "stop event was fired twice, once for each element");
+        equal(stopped, 1, "stop event was fired once");
     });
 
 
@@ -888,6 +894,87 @@ var testSuite = function () {
         equal(parseInt(foo.style.top, 10), 90, "top position of foo correct after drag");
 
         equal(foo, draggedChild, "it was Foo that was dragged");
+    });
+
+    test("multiple delegate selectors on one Drag object", function () {
+        var d = _add("d1", null, [0,0], [500,500]),
+            foo = _add("foo", d, [20,20], [50,50]),
+            bar = _add("bar", d, [100,100], [50,50]),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        foo.className="child";
+        bar.className="child2";
+
+        var draggedChild;
+
+        var dragHandler = k.draggable(d, {
+            start: function () {
+                started = true;
+            },
+            stop: function (p) {
+                stopped = true;
+                draggedChild = p.el;
+            },
+            selector:".child"
+        })[0];
+
+        // move 'foo' around
+        _t(m, foo, "mousedown", 30, 30);
+        _t(m, document, "mousemove", 100, 100);
+        ok(foo.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!foo.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+        equal(parseInt(foo.style.left, 10), 90, "left position of foo correct after drag");
+        equal(parseInt(foo.style.top, 10), 90, "top position of foo correct after drag");
+        equal(foo, draggedChild, "it was Foo that was dragged");
+        
+        stopped = false;
+        started = false;
+        draggedChild = null;
+
+        // attempt to move the parent element, but it has no drag handler on it, so will do nothing
+        _t(m, d, "mousedown", 30, 30);
+        _t(m, document, "mousemove", 100, 100);
+        ok(!d.classList.contains("katavorio-drag"), "drag class NOT set on parent element, no drag handler registered");
+        m.trigger(document, "mouseup");
+        ok(!started, "start event was not fired on parent element");
+        ok(!stopped, "stop event was not fired on parent element");
+
+        // _t(m, bar, "mousedown", 30, 30);
+        // _t(m, document, "mousemove", 100, 100);
+        // ok(!foo.classList.contains("katavorio-drag"), "drag class not set on element");
+        // m.trigger(document, "mouseup");
+        // ok(!started, "start event was not fired on bar");
+        // ok(!stopped, "stop event was not fired on bar");
+        // equal(parseInt(foo.style.left, 10), 100, "left position of bar unchanged");
+        // equal(parseInt(foo.style.top, 10), 100, "top position of bar unchanged");
+        // equal(null, draggedChild, "dragged child still null");
+        
+        var barStarted = false, barStopped = false;
+        dragHandler.addSelector({
+            selector:".child2",
+            start: function () {
+                barStarted = true;
+            },
+            stop: function (p) {
+                barStopped = true;
+                draggedChild = p.el;
+            }
+        });
+
+        // now try to move 'bar' around again
+        _t(m, bar, "mousedown", 30, 30);
+        _t(m, document, "mousemove", 100, 100);
+        ok(bar.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!bar.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(barStopped, "stop event was fired");
+        equal(parseInt(bar.style.left, 10), 170, "left position of bar correct after drag");
+        equal(parseInt(bar.style.top, 10), 170, "top position of bar correct after drag");
+        equal(bar, draggedChild, "it was Bar that was dragged");
     });
 
     test("elements cannot be dragged to negative values if allowNegative:false", function () {
