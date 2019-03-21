@@ -100,6 +100,17 @@
         }
     };
 
+    var findMatchingSelector = function(availableSelectors, parentElement, childElement) {
+        var el = null;
+        for (var i = 0; i < availableSelectors.length; i++) {
+            el = findDelegateElement(parentElement, childElement, availableSelectors[i].selector);
+            if (el != null) {
+                return [ availableSelectors[i], el ];
+            }
+        }
+        return null;
+    };
+
     var iev = (function() {
             var rv = -1;
             if (navigator.appName === 'Microsoft Internet Explorer') {
@@ -242,7 +253,14 @@
             useGhostProxy = params.ghostProxy === true ? TRUE : params.ghostProxy && typeof params.ghostProxy === "function" ? params.ghostProxy : FALSE,
             ghostProxy = function(el) { return el.cloneNode(true); },
             selector = params.selector,
-            elementToDrag = null;
+            elementToDrag = null,
+            availableSelectors = [],
+            activeSelectorParams = null; // which, if any, selector config is currently active.
+
+        // if an initial selector was provided, push the entire set of params as a selector config.
+        if (params.selector) {
+            availableSelectors.push(params);
+        }
 
         var snapThreshold = params.snapThreshold,
             _snap = function(pos, gridX, gridY, thresholdX, thresholdY) {
@@ -379,6 +397,12 @@
             matchingDroppables = [],
             intersectingDroppables = [];
 
+        this.addSelector = function(params) {
+            if (params.selector) {
+                availableSelectors.push(params);
+            }
+        };
+
         this.downListener = function(e) {
             var isNotRightClick = this.rightButtonCanDrag || (e.which !== 3 && e.button !== 2);
             if (isNotRightClick && this.isEnabled() && this.canDrag()) {
@@ -386,8 +410,22 @@
                 var _f =  _testFilter(e) && _inputFilter(e, this.el, this.k);
                 if (_f) {
 
-                    if (selector) {
-                        elementToDrag = findDelegateElement(this.el, e.target || e.srcElement, selector);
+                    activeSelectorParams = null;
+                    elementToDrag = null;
+
+                    // if (selector) {
+                    //     elementToDrag = findDelegateElement(this.el, e.target || e.srcElement, selector);
+                    //     if(elementToDrag == null) {
+                    //         return;
+                    //     }
+                    // }
+                    if (availableSelectors.length > 0) {
+                        var match = findMatchingSelector(availableSelectors, this.el, e.target || e.srcElement);
+                        if (match != null) {
+                            activeSelectorParams = match[0];
+                            elementToDrag = match[1];
+                        }
+                        // elementToDrag = findDelegateElement(this.el, e.target || e.srcElement, selector);
                         if(elementToDrag == null) {
                             return;
                         }
@@ -575,14 +613,9 @@
                     sel = k.getSelection(),
                     dPos = this.params.getPosition(dragEl);
 
-                if (sel.length > 1) {
-                    for (var i = 0; i < sel.length; i++) {
-                        var p = this.params.getPosition(sel[i].el);
-                        positions.push([ sel[i].el, { left: p[0], top: p[1] }, sel[i] ]);
-                    }
-                }
-                else {
-                    positions.push([ dragEl, {left:dPos[0], top:dPos[1]}, this ]);
+                for (var i = 0; i < sel.length; i++) {
+                    var p = this.params.getPosition(sel[i].el);
+                    positions.push([ sel[i].el, { left: p[0], top: p[1] }, sel[i] ]);
                 }
 
                 _dispatch("stop", {
@@ -905,7 +938,7 @@
                         _el._katavorioDrag = new Drag(_el, p, _css, _scope);
                         _reg(_el._katavorioDrag, this._dragsByScope);
                         o.push(_el._katavorioDrag);
-                        katavorioParams.addClass(_el, params.selector ? _css.delegatedDraggable : _css.draggable);
+                        katavorioParams.addClass(_el, p.selector ? _css.delegatedDraggable : _css.draggable);
                     }
                     else {
                         _mistletoe(_el._katavorioDrag, params);
