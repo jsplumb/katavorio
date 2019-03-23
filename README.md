@@ -38,6 +38,10 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+#### 1.4.1
+
+- add test to ensure event's default not prevented when responding to initial mouse down
+
 #### 1.4.0
 
 - Add support for multiple selector definitions on a single Drag object, via the new `addSelector` method. You can make some element draggable and then
