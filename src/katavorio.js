@@ -403,6 +403,7 @@
         };
 
         this.downListener = function(e) {
+            if (e.defaultPrevented) { return; }
             var isNotRightClick = this.rightButtonCanDrag || (e.which !== 3 && e.button !== 2);
             if (isNotRightClick && this.isEnabled() && this.canDrag()) {
 
