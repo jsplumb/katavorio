@@ -252,7 +252,6 @@
             isConstrained = false,
             useGhostProxy = params.ghostProxy === true ? TRUE : params.ghostProxy && typeof params.ghostProxy === "function" ? params.ghostProxy : FALSE,
             ghostProxy = function(el) { return el.cloneNode(true); },
-            selector = params.selector,
             elementToDrag = null,
             availableSelectors = [],
             activeSelectorParams = null; // which, if any, selector config is currently active.
@@ -589,7 +588,9 @@
 
         var _dispatch = function(evt, value) {
             var result = null;
-            if (listeners[evt]) {
+            if (activeSelectorParams && activeSelectorParams[evt]) {
+                activeSelectorParams[evt](value);
+            } else if (listeners[evt]) {
                 for (var i = 0; i < listeners[evt].length; i++) {
                     try {
                         var v = listeners[evt][i](value);
@@ -739,7 +740,7 @@
         // init:register mousedown, and perhaps set a filter
         this.params.bind(this.el, "mousedown", this.downListener);
 
-        // if handle provded, use that.  otherwise, try to set a filter.
+        // if handle provided, use that.  otherwise, try to set a filter.
         // note that a `handle` selector always results in filterExclude being set to false, ie.
         // the selector defines the handle element(s).
         if (this.params.handle)
