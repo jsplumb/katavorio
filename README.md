@@ -38,6 +38,27 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+#### 1.4.0
+
+- Add support for multiple selector definitions on a single Drag object, via the new `addSelector` method. You can make some element draggable and then
+attach more listeners to that object, rather than having to create a whole new draggable:
+
+```
+let d = katavorioInstance.draggable(someElement, {
+  selector:".childSelector",
+  start:function(p) { ... },
+  etc
+});
+
+d.addSelector({
+  selector:".someOtherChildSelector",
+  start:function(p) { ... },
+  etc
+});
+```
+
+
+
 #### 1.3.0
 
 - for delegated draggables (ie when you provide a `selector` in the params), we use the class `katavorio-delegated-draggable` now, instead of
