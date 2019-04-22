@@ -76,10 +76,12 @@
                 drop:function(p) {
                     var dl = target.offsetLeft - source.offsetLeft,
                         dt = target.offsetTop - source.offsetTop,
-                        draggedElement = p.drag.getDragElement(true);//p.drag.el;
+                        draggedElement = p.drag.getDragElement(true),
+                        l = (draggedElement.offsetLeft - dl),
+                        t = (draggedElement.offsetTop - dt);
 
-                    draggedElement.style.left = (draggedElement.offsetLeft - dl) + "px";
-                    draggedElement.style.top = (draggedElement.offsetTop - dt) + "px";
+                    draggedElement.style.left = l + "px";
+                    draggedElement.style.top = t + "px";
 
                     target.appendChild(draggedElement);
                 }
