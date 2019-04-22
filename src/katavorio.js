@@ -254,7 +254,12 @@
             ghostProxy = function(el) { return el.cloneNode(true); },
             elementToDrag = null,
             availableSelectors = [],
-            activeSelectorParams = null; // which, if any, selector config is currently active.
+            activeSelectorParams = null, // which, if any, selector config is currently active.
+            ghostProxyParent = params.ghostProxyParent,
+            currentParentPosition,
+            ghostParentPosition,
+            ghostDx,
+            ghostDy;
 
         // if an initial selector was provided, push the entire set of params as a selector config.
         if (params.selector) {
@@ -648,6 +653,9 @@
             }
             constrainRect = {w: cs[0], h: cs[1]};
 
+            ghostDx = 0;
+            ghostDy = 0;
+
             if (andNotify) {
                 k.notifySelectionDragStart(this);
             }
@@ -658,7 +666,8 @@
 
             if (isConstrained && useGhostProxy(elementToDrag)) {
                 ghostProxyOffsets = [dragEl.offsetLeft, dragEl.offsetTop];
-                elementToDrag.parentNode.removeChild(dragEl);
+                //elementToDrag.parentNode.removeChild(dragEl);
+                dragEl.parentNode.removeChild(dragEl);
                 dragEl = elementToDrag;
             }
             else {
@@ -681,25 +690,61 @@
         };
         this.moveBy = function(dx, dy, e) {
             intersectingDroppables.length = 0;
+
+            // if (isConstrained && ghostDx != null && ghostDy != null) {
+            //     dx += ghostDx;
+            //     dy += ghostDy;
+            // }
+
             var desiredLoc = this.toGrid([posAtDown[0] + dx, posAtDown[1] + dy]),
                 cPos = constrain(desiredLoc, dragEl, constrainRect, this.size);
 
+            // if we should use a ghost proxy...
             if (useGhostProxy(this.el)) {
+                // and the element has been dragged outside of its parent bounds
                 if (desiredLoc[0] !== cPos[0] || desiredLoc[1] !== cPos[1]) {
+
+                    console.log("constrain altered drag pos", desiredLoc, cPos);
+
+                    // ...if ghost proxy not yet created
                     if (!isConstrained) {
+                        // create it
                         var gp = ghostProxy(elementToDrag);
                         params.addClass(gp, _classes.ghostProxy);
-                        elementToDrag.parentNode.appendChild(gp);
+
+                        if (ghostProxyParent) {
+                            ghostProxyParent.appendChild(gp);
+                            // find offset between drag el's parent the ghost parent
+                           currentParentPosition = params.getPosition(elementToDrag.parentNode, true);
+                           ghostParentPosition = params.getPosition(params.ghostProxyParent, true);
+                           ghostDx = currentParentPosition[0] - ghostParentPosition[0];
+                           ghostDy = currentParentPosition[1] - ghostParentPosition[1];
+
+                        } else {
+                            elementToDrag.parentNode.appendChild(gp);
+                        }
+
+                        // the ghost proxy is the drag element
                         dragEl = gp;
+                        // set this flag so we dont recreate the ghost proxy
                         isConstrained = true;
                     }
+                    // now the drag position can be the desired position, as the ghost proxy can support it.
                     cPos = desiredLoc;
                 }
                 else {
+                    // if the element is not outside of its parent bounds, and ghost proxy is in place,
                     if (isConstrained) {
-                        elementToDrag.parentNode.removeChild(dragEl);
+                        // remove the ghost proxy from the dom
+                        dragEl.parentNode.removeChild(dragEl);
+                        // reset the drag element to the original element
                         dragEl = elementToDrag;
+                        // clear this flag.
                         isConstrained = false;
+                        currentParentPosition = null;
+                        ghostParentPosition = null;
+                        ghostDx = 0;
+                        ghostDy = 0;
                     }
                 }
             }
@@ -708,7 +753,9 @@
                 pageRect = { x:rect.x + pageDelta[0], y:rect.y + pageDelta[1], w:rect.w, h:rect.h},
                 focusDropElement = null;
 
-            this.params.setPosition(dragEl, cPos);
+            //this.params.setPosition(dragEl, cPos);
+            this.params.setPosition(dragEl, [cPos[0] + ghostDx, cPos[1] + ghostDy]);
+
             for (var i = 0; i < matchingDroppables.length; i++) {
                 var r2 = { x:matchingDroppables[i].pagePosition[0], y:matchingDroppables[i].pagePosition[1], w:matchingDroppables[i].size[0], h:matchingDroppables[i].size[1]};
                 if (this.params.intersects(pageRect, r2) && (_multipleDrop || focusDropElement == null || focusDropElement === matchingDroppables[i].el) && matchingDroppables[i].canDrop(this)) {
