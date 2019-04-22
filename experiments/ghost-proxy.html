@@ -68,7 +68,8 @@
 
             k.draggable(source.querySelector(".w"), {
                 constrain:true,
-                ghostProxy:true
+                ghostProxy:true,
+                ghostProxyParent:document.body
             });
 
             k.droppable(target, {
