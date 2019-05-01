@@ -38,6 +38,10 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+##### 1.4.4
+
+- support revert function being passed in to constructor.
+
 #### 1.4.3
 
 - added support for "combinator rooted" queries for delegated drags.
