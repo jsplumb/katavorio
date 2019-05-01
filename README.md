@@ -38,6 +38,10 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+#### 1.4.3
+
+- added support for "combinator rooted" queries for delegated drags.
+
 #### 1.4.2
 
 - added support for provision of `ghostProxyParent` when using a ghost proxy to drag.
