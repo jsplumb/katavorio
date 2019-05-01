@@ -883,6 +883,46 @@ var testSuite = function () {
             selector:".child"
         });
 
+        // element `d` should have a katavorio-draggable attribute set
+        ok(d.getAttribute("katavorio-draggable") != null, "katavorio-draggable attribute set");
+
+        _t(m, foo, "mousedown", 30, 30);
+        _t(m, document, "mousemove", 100, 100);
+        ok(foo.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!foo.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+
+        equal(parseInt(foo.style.left, 10), 90, "left position of foo correct after drag");
+        equal(parseInt(foo.style.top, 10), 90, "top position of foo correct after drag");
+
+        equal(foo, draggedChild, "it was Foo that was dragged");
+    });
+
+    test("elements dragged to correct location, using delegate with a scoped root selector", function () {
+        var d = _add("d1", null, [0,0], [500,500]),
+            foo = _add("foo", d, [20,20], [50,50]),
+            bar = _add("bar", d, [100,100], [50,50]),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        foo.className="child";
+        bar.className="child";
+
+        var draggedChild;
+
+        k.draggable(d, {
+            start: function () {
+                started = true;
+            },
+            stop: function (p) {
+                stopped = true;
+                draggedChild = p.el;
+            },
+            selector:"> .child"
+        });
+
         _t(m, foo, "mousedown", 30, 30);
         _t(m, document, "mousemove", 100, 100);
         ok(foo.classList.contains("katavorio-drag"), "drag class set on element");
