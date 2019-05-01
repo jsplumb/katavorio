@@ -100,10 +100,26 @@
         }
     };
 
+    /**
+     * Finds all elements matching the given selector, for the given parent. In order to support "scoped root" selectors,
+     * ie. things like "> .someClass", that is .someClass elements that are direct children of `parentElement`, we have to
+     * jump through a small hoop here: when a delegate draggable is registered, we write a `katavorio-draggable` attribute
+     * on the element on which the draggable is registered. Then when this method runs, we grab the value of that attribute and
+     * prepend it as part of the selector we're looking for.  So "> .someClass" ends up being written as
+     * "[katavorio-draggable='...' > .someClass]", which works with querySelectorAll.
+     *
+     * @param availableSelectors
+     * @param parentElement
+     * @param childElement
+     * @returns {*}
+     */
     var findMatchingSelector = function(availableSelectors, parentElement, childElement) {
         var el = null;
+        var draggableId = parentElement.getAttribute("katavorio-draggable"),
+            prefix = draggableId != null ? "[katavorio-draggable='" + draggableId + "'] " : "";
+
         for (var i = 0; i < availableSelectors.length; i++) {
-            el = findDelegateElement(parentElement, childElement, availableSelectors[i].selector);
+            el = findDelegateElement(parentElement, childElement, prefix + availableSelectors[i].selector);
             if (el != null) {
                 return [ availableSelectors[i], el ];
             }
@@ -263,6 +279,12 @@
 
         // if an initial selector was provided, push the entire set of params as a selector config.
         if (params.selector) {
+            var draggableId = el.getAttribute("katavorio-draggable");
+            if (draggableId == null) {
+                draggableId = "" + new Date().getTime();
+                el.setAttribute("katavorio-draggable", draggableId);
+            }
+
             availableSelectors.push(params);
         }
 
