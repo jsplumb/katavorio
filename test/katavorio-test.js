@@ -31,6 +31,28 @@ var divs = [],
             parseInt(el.style.left, 10),
             parseInt(el.style.top, 10)
         ];
+    },
+    _makeInstance = function(options) {
+        options = options || {};
+        var defaults = {
+            getPosition: seh.getPosition,
+            setPosition: seh.setPosition,
+            getSize: seh.getSize,
+            addClass: seh.addClass,
+            removeClass: seh.removeClass,
+            bind: seh.addEvent,
+            unbind: seh.removeEvent,
+            fireEvent: function () {
+                console.log(arguments);
+            },
+            intersects: seh.intersects,
+            indexOf: seh.indexOf,
+            getId: seh.getId
+        };
+        for (var i in options) {
+            defaults[i] = options[i];
+        }
+        return new Katavorio(defaults);
     };
 
 var testSuite = function () {
@@ -38,21 +60,7 @@ var testSuite = function () {
     module("Katavorio", {
         teardown: _clear,
         setup: function () {
-            k = new Katavorio({
-                getPosition: seh.getPosition,
-                setPosition: seh.setPosition,
-                getSize: seh.getSize,
-                addClass: seh.addClass,
-                removeClass: seh.removeClass,
-                bind: seh.addEvent,
-                unbind: seh.removeEvent,
-                fireEvent: function () {
-                    console.log(arguments);
-                },
-                intersects: seh.intersects,
-                indexOf: seh.indexOf,
-                getId: seh.getId
-            });
+            k = _makeInstance();
         }
     });
 
@@ -934,6 +942,51 @@ var testSuite = function () {
         equal(parseInt(foo.style.top, 10), 90, "top position of foo correct after drag");
 
         equal(foo, draggedChild, "it was Foo that was dragged");
+    });
+
+    test("elements revert when told to", function () {
+        var d = _add("d1", null, [0,0], [500,500]),
+            foo = _add("foo", d, [20,20], [50,50]),
+            bar = _add("bar", d, [100,100], [50,50]),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        foo.className="child";
+        bar.className="child";
+
+        var draggedChild;
+
+        var kk = _makeInstance({
+            revert:function(el, pos) {
+                return (el.id === "foo"); // revert 'foo', allow 'bar' to move
+            }
+        });
+
+        kk.draggable(d, {
+            start: function () {
+                started = true;
+            },
+            stop: function (p) {
+                stopped = true;
+                draggedChild = p.el;
+            },
+            selector:"> .child"
+        });
+
+        equal(parseInt(foo.style.left, 10), 20, "left position of foo correct to start");
+        equal(parseInt(bar.style.left, 10), 100, "left position of bar correct to start");
+
+        _t(m, foo, "mousedown", 30, 30);
+        _t(m, document, "mousemove", 100, 100);
+        m.trigger(document, "mouseup");
+
+        _t(m, bar, "mousedown", 30, 30);
+        _t(m, document, "mousemove", 130, 130);
+        m.trigger(document, "mouseup");
+
+        equal(parseInt(foo.style.left, 10), 20, "left position of foo unchanged after drag");
+        equal(parseInt(bar.style.left, 10), 200, "left position of bar changed after drag");
     });
 
     test("multiple delegate selectors on one Drag object", function () {
