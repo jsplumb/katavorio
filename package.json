@@ -1,6 +1,6 @@
 {
   "name": "katavorio",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "Lightweight drag/drop handler",
   "main": "src/katavorio.js",
   "files": [
