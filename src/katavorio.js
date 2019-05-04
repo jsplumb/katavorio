@@ -643,7 +643,7 @@
                     sel = k.getSelection(),
                     dPos = this.params.getPosition(dragEl);
 
-                if (sel.length > 1) {
+                if (sel.length > 0) {
                     for (var i = 0; i < sel.length; i++) {
                         var p = this.params.getPosition(sel[i].el);
                         positions.push([ sel[i].el, { left: p[0], top: p[1] }, sel[i] ]);
