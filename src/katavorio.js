@@ -618,7 +618,7 @@
         var _dispatch = function(evt, value) {
             var result = null;
             if (activeSelectorParams && activeSelectorParams[evt]) {
-                activeSelectorParams[evt](value);
+                result = activeSelectorParams[evt](value);
             } else if (listeners[evt]) {
                 for (var i = 0; i < listeners[evt].length; i++) {
                     try {
