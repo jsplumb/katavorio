@@ -38,6 +38,10 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+#### 1.4.6
+
+- pass the return value of a delegate to the code that tests if a drag can begin.
+
 #### 1.4.5
 
 - fixed an issue with drag stop event for single node drags.
