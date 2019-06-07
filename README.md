@@ -38,6 +38,10 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+#### 1.4.7
+
+- pass current drag element in callback to "should proxy" function. Required when a delegate drag is occurring.
+
 #### 1.4.6
 
 - pass the return value of a delegate to the code that tests if a drag can begin.
