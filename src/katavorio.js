@@ -692,7 +692,7 @@
         this.unmark = function(e, doNotCheckDroppables) {
             _setDroppablesActive(matchingDroppables, false, true, this);
 
-            if (isConstrained && useGhostProxy(elementToDrag)) {
+            if (isConstrained && useGhostProxy(elementToDrag, dragEl)) {
                 ghostProxyOffsets = [dragEl.offsetLeft - ghostDx, dragEl.offsetTop - ghostDy];
                 dragEl.parentNode.removeChild(dragEl);
                 dragEl = elementToDrag;
@@ -722,7 +722,7 @@
                 cPos = constrain(desiredLoc, dragEl, constrainRect, this.size);
 
             // if we should use a ghost proxy...
-            if (useGhostProxy(this.el)) {
+            if (useGhostProxy(this.el, dragEl)) {
                 // and the element has been dragged outside of its parent bounds
                 if (desiredLoc[0] !== cPos[0] || desiredLoc[1] !== cPos[1]) {
 
