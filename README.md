@@ -38,6 +38,10 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+#### 1.4.8
+
+- support filter and filterExclude in delegated drag handlers
+
 #### 1.4.7
 
 - pass current drag element in callback to "should proxy" function. Required when a delegate drag is occurring.
