@@ -333,9 +333,11 @@
             y = y || (this.params.grid ? this.params.grid[1] : DEFAULT_GRID_Y);
             var p = this.params.getPosition(dragEl),
                 tx = this.params.grid ? this.params.grid[0] / 2 : snapThreshold,
-                ty = this.params.grid ? this.params.grid[1] / 2 : snapThreshold;
+                ty = this.params.grid ? this.params.grid[1] / 2 : snapThreshold,
+                snapped = _snap(p, x, y, tx, ty);
 
-            this.params.setPosition(dragEl, _snap(p, x, y, tx, ty));
+            this.params.setPosition(dragEl, snapped);
+            return snapped;
         };
 
         this.setUseGhostProxy = function(val) {
