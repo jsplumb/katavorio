@@ -38,6 +38,10 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+#### 1.4.9
+
+- return grid position from snap method on draggable.
+
 #### 1.4.8
 
 - support filter and filterExclude in delegated drag handlers
