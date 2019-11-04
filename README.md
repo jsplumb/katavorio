@@ -38,6 +38,10 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+#### 1.4.10
+
+- support ghost proxy handling by selectors in a drag.
+
 #### 1.4.9
 
 - return grid position from snap method on draggable.
