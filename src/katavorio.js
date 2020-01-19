@@ -401,6 +401,14 @@
             _setConstrain(value);
         };
 
+        /* private */ var _doConstrain = function(pos, dragEl, _constrainRect, _size) {
+            if (activeSelectorParams != null && activeSelectorParams.constrain && typeof activeSelectorParams.constrain === "function") {
+                return activeSelectorParams.constrain(pos, dragEl, _constrainRect, _size);
+            } else {
+                return constrain(pos, dragEl, _constrainRect, _size);
+            }
+        };
+
         var revertFunction;
         /**
          * Sets a function to call on drag stop, which, if it returns true, indicates that the given element should
@@ -761,7 +769,7 @@
             intersectingDroppables.length = 0;
 
             var desiredLoc = this.toGrid([posAtDown[0] + dx, posAtDown[1] + dy]),
-                cPos = constrain(desiredLoc, dragEl, constrainRect, this.size);
+                cPos = _doConstrain(desiredLoc, dragEl, constrainRect, this.size);
 
             // if we should use a ghost proxy...
             if (useGhostProxy(this.el, dragEl)) {

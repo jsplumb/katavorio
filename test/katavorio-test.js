@@ -1165,6 +1165,77 @@ var testSuite = function () {
 
     });
 
+    test("delegate selector with constrain function", function () {
+        var d = _add("d1", null, [0,0], [500,500]),
+            foo = _add("foo", d, [20,20], [50,50]),
+            bar = _add("bar", d, [100,100], [50,50]),
+            m = new Mottle(),
+            started = false,
+            stopped = false;
+
+        foo.className="child";
+        bar.className="child2";
+
+        var draggedChild;
+
+        var dragHandler = k.draggable(d, {
+            start: function () {
+                started = true;
+            },
+            stop: function (p) {
+                stopped = true;
+                draggedChild = p.el;
+            },
+            selector:".child"
+        })[0];
+
+        // move 'foo' around
+        _t(m, foo, "mousedown", 30, 30);
+        _t(m, document, "mousemove", 100, 100);
+        ok(foo.classList.contains("katavorio-drag"), "drag class set on element");
+        m.trigger(document, "mouseup");
+        ok(!foo.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(stopped, "stop event was fired");
+        equal(parseInt(foo.style.left, 10), 90, "left position of foo correct after drag");
+        equal(parseInt(foo.style.top, 10), 90, "top position of foo correct after drag");
+        equal(foo, draggedChild, "it was Foo that was dragged");
+
+        stopped = false;
+        started = false;
+        draggedChild = null;
+
+        var constrainInvoked = false;
+
+        var barStarted = false, barStopped = false;
+        dragHandler.addSelector({
+            selector:".child2",
+            start: function () {
+                barStarted = true;
+            },
+            stop: function (p) {
+                barStopped = true;
+                draggedChild = p.el;
+            },
+            // 'constrain' multiplies target by 10
+            constrain:function(pos) {
+                constrainInvoked = true;
+                return [ pos[0] * 10, pos[1] * 10];
+            }
+        });
+
+        // now try to move 'bar' around
+        _t(m, bar, "mousedown", 30, 30);
+        _t(m, document, "mousemove", 100, 100);
+        ok(bar.classList.contains("katavorio-drag"), "drag class set on element");
+        ok(constrainInvoked, "constrain function was invoked");
+        m.trigger(document, "mouseup");
+        ok(!bar.classList.contains("katavorio-drag"), "drag class no longer set on element");
+        ok(barStopped, "stop event was fired");
+        equal(parseInt(bar.style.left, 10), 1700, "left position of bar correct after drag, with constrain function invoked");
+        equal(parseInt(bar.style.top, 10), 1700, "top position of bar correct after drag, with constrain function invoked");
+        equal(bar, draggedChild, "it was Bar that was dragged");
+    });
+
     test("elements cannot be dragged to negative values if allowNegative:false", function () {
         var d = _add("d1"),
             foo = _add("foo", d),
