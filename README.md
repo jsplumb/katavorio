@@ -38,10 +38,13 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+#### 1.4.11
+
+- support constrain functions in a drag selector
+
 #### 1.4.10
 
 - support ghost proxy handling by selectors in a drag.
-- support constrain functions in a drag selector
 
 #### 1.4.9
 
