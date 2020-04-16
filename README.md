@@ -38,6 +38,10 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+#### 1.5.0
+
+- Changed package name to @jsplumb/katavorio
+
 #### 1.4.11
 
 - support constrain functions in a drag selector
