@@ -38,6 +38,12 @@ For more information, take a look in [the wiki](https://github.com/jsplumb/katav
 
 ### Changelog
 
+#### 1.5.1
+
+17 Sep 2020
+
+- added a test in `elementRemoved` to check if an element is in fact draggable/droppable before running the code to de-register it.
+
 #### 1.5.0
 
 - Changed package name to @jsplumb/katavorio
