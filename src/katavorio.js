@@ -1262,8 +1262,12 @@
         };
 
         this.elementRemoved = function(el) {
-            this.destroyDraggable(el);
-            this.destroyDroppable(el);
+            if (el["_katavorioDrag"]) {
+                this.destroyDraggable(el);
+            }
+            if (el["_katavorioDrop"]) {
+                this.destroyDroppable(el);
+            }
         };
 
         /**
