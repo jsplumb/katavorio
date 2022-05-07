@@ -1,3 +1,5 @@
+*NOTE* As of May 2022 this project has been archived. No development work has been done for 18 months or so as the drag handling code in jsPlumb has been moved to a module in the 5.x branch.
+
 ## Katavorio
 
 
